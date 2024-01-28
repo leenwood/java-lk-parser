@@ -3,7 +3,10 @@ package com.parser.lk.controller;
 
 import com.parser.lk.services.requester.dto.PokemonAbilityInfoResponse;
 import com.parser.lk.services.requester.RequestService;
+import com.parser.lk.services.requester.dto.VacanciesResponseInterface;
 import com.parser.lk.services.requester.headhunteradapter.dto.VacanciesResponse;
+import com.parser.lk.services.vacanciesparser.VacanciesParser;
+import com.parser.lk.services.vacanciesparser.dto.HeadHunterFiltersParam;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -12,9 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class TestController {
 
+    private final VacanciesParser vacanciesParser;
     private final RequestService requestService;
 
-    public TestController(RequestService requestService) {
+    public TestController(VacanciesParser vacanciesParser, RequestService requestService) {
+        this.vacanciesParser = vacanciesParser;
         this.requestService = requestService;
     }
 
@@ -31,8 +36,9 @@ public class TestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/vacancies", produces = MediaType.APPLICATION_JSON_VALUE)
-    public VacanciesResponse vacancies() {
-        VacanciesResponse response = this.requestService.getVacancies();
-        return response;
+    public VacanciesResponseInterface vacancies() {
+        var filter = new HeadHunterFiltersParam();
+        var response = this.vacanciesParser.ParseVacancies(filter);
+        return null;
     }
 }

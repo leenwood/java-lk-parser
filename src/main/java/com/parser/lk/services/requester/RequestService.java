@@ -27,25 +27,6 @@ public class RequestService {
         return response.getBody();
     }
 
-//    public String getVacancies() {
-//        RestTemplate restTemplate = new RestTemplate();
-//        ResponseEntity<String> response = restTemplate.exchange(
-//                this.headHunterAdapterService.generateUrlVacancies(),
-//                HttpMethod.GET,
-//                this.headHunterAdapterService.getConfiguration(),
-//                String.class
-//                );
-//        return response.getBody();
-//    }
 
-    public VacanciesResponse getVacancies() {
-        ResponseEntity<VacanciesResponse> response = this.restTemplate.exchange(
-                this.headHunterAdapterService.generateUrlVacancies(),
-                HttpMethod.GET,
-                this.headHunterAdapterService.getConfiguration(),
-                VacanciesResponse.class
-        );
-        return response.getBody();
-    }
 
 }

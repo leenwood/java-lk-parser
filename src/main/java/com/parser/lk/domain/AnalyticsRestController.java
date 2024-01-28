@@ -1,7 +1,7 @@
 package com.parser.lk.domain;
 
 
-import com.parser.lk.models.response.analytics.SuccessResponse;
+import com.parser.lk.dto.response.analytics.SuccessResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

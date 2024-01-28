@@ -1,4 +1,4 @@
-package com.parser.lk.models.response.analytics;
+package com.parser.lk.dto.response.analytics;
 
 
 import lombok.Data;
