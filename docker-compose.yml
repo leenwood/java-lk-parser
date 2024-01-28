@@ -10,4 +10,5 @@ services:
       - POSTGRES_DB=parser_db
       - POSTGRES_USER=parser_user
       - POSTGRES_PASSWORD=parser_password
-
+    ports:
+      - "5432:5432"
