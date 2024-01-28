@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>profit.junior</groupId>
-    <artifactId>demo1</artifactId>
+    <artifactId>java-lk-parser</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>demo1</name>
-    <description>demo1</description>
+    <name>java-lk-parser</name>
+    <description>Проект созданый для урфу в качестве диплома, заказчик продукта является Artsofte</description>
     <properties>
         <java.version>21</java.version>
     </properties>
