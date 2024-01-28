@@ -31,8 +31,8 @@ public class TestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/vacancies", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String vacancies() {
+    public VacanciesResponse vacancies() {
         VacanciesResponse response = this.requestService.getVacancies();
-        return response.toString();
+        return response;
     }
 }

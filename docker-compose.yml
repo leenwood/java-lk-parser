@@ -4,8 +4,9 @@ services:
     image: postgres:15
     container_name: "db-postgresql"
     restart: always
-    volumes:
-      - ./docker/postgresql/data/:/var/lib/postgresql/data/
+    # раскоменитить для сохранения БД
+#    volumes:
+#      - ./docker/postgresql/data/:/var/lib/postgresql/data/
     environment:
       - POSTGRES_DB=parser_db
       - POSTGRES_USER=parser_user
