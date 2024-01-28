@@ -1,0 +1,21 @@
+package com.example.demo.services.requester.headHunterAdapter.dto;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
+
+@Data
+public class VacancyResponse {
+
+    private String id;
+
+    private String name;
+
+    @JsonProperty("alternate_url")
+    private String originUrl;
+
+    private AreaResponse area;
+
+    private SalaryResponse salary;
+
+    private EmploymentResponse employment;
+}
