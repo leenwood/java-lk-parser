@@ -1,4 +1,4 @@
-package com.example.demo.services.requester.headHunterAdapter;
+package com.parser.lk.services.requester.headHunterAdapter;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;

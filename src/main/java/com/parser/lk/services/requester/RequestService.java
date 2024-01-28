@@ -1,8 +1,8 @@
-package com.example.demo.services.requester;
+package com.parser.lk.services.requester;
 
-import com.example.demo.services.requester.dto.PokemonResponse;
-import com.example.demo.services.requester.headHunterAdapter.HeadHunterAdapterService;
-import com.example.demo.services.requester.headHunterAdapter.dto.VacanciesResponse;
+import com.parser.lk.services.requester.dto.PokemonResponse;
+import com.parser.lk.services.requester.headHunterAdapter.HeadHunterAdapterService;
+import com.parser.lk.services.requester.headHunterAdapter.dto.VacanciesResponse;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;

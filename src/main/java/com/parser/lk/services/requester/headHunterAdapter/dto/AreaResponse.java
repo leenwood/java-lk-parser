@@ -1,4 +1,4 @@
-package com.example.demo.services.requester.headHunterAdapter.dto;
+package com.parser.lk.services.requester.headHunterAdapter.dto;
 
 import lombok.Data;
 

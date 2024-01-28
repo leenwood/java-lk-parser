@@ -1,4 +1,4 @@
-package com.example.demo.services.requester.dto;
+package com.parser.lk.services.requester.dto;
 
 import lombok.Data;
 
