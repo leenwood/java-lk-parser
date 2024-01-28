@@ -38,7 +38,9 @@ public class TestController {
     @RequestMapping(method = RequestMethod.GET, value = "/vacancies", produces = MediaType.APPLICATION_JSON_VALUE)
     public VacanciesResponseInterface vacancies() {
         var filter = new HeadHunterFiltersParam();
+        filter.setPer_page(2);
         var response = this.vacanciesParser.ParseVacancies(filter);
+        System.out.println(1);
         return null;
     }
 }

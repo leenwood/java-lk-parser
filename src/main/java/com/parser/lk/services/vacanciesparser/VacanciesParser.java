@@ -6,6 +6,9 @@ import com.parser.lk.services.requester.RequesterInterface;
 import com.parser.lk.services.requester.dto.VacanciesResponseInterface;
 import com.parser.lk.services.vacanciesparser.dto.FilterParamInterface;
 import com.parser.lk.services.vacanciesparser.dto.vacancies.Vacancies;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -13,6 +16,10 @@ public class VacanciesParser {
 
     private final RequesterFactory factory;
 
+    @Autowired @Qualifier("defaultConversionService") ConversionService conversionService;
+
+
+    @Autowired
     public VacanciesParser(RequesterFactory factory) {
         this.factory = factory;
     }
@@ -28,7 +35,6 @@ public class VacanciesParser {
     private Vacancies ParseHeadHunterVacancies(FilterParamInterface filter) {
         RequesterInterface requester = this.factory.getRequester(RequesterEnum.HEAD_HUNTER_REQUESTER);
         VacanciesResponseInterface vacancies = requester.getVacancies(filter);
-        System.out.println(1);
         return null;
     }
 
