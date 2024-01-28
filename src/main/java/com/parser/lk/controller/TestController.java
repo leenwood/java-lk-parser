@@ -3,7 +3,7 @@ package com.parser.lk.controller;
 
 import com.parser.lk.services.requester.dto.PokemonAbilityInfoResponse;
 import com.parser.lk.services.requester.RequestService;
-import com.parser.lk.services.requester.headHunterAdapter.dto.VacanciesResponse;
+import com.parser.lk.services.requester.headhunteradapter.dto.VacanciesResponse;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;

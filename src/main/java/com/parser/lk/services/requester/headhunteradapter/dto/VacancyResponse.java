@@ -1,4 +1,4 @@
-package com.parser.lk.services.requester.headHunterAdapter.dto;
+package com.parser.lk.services.requester.headhunteradapter.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
