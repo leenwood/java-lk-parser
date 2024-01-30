@@ -1,7 +1,7 @@
 package com.parser.lk.services.requester.headhunteradapter.dto;
 
 
-import com.parser.lk.services.requester.dto.VacanciesResponseInterface;
+import com.parser.lk.services.requester.VacanciesResponseInterface;
 import lombok.Data;
 
 import java.util.List;

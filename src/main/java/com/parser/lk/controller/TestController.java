@@ -1,7 +1,7 @@
 package com.parser.lk.controller;
 
 
-import com.parser.lk.services.requester.dto.VacanciesResponseInterface;
+import com.parser.lk.services.requester.VacanciesResponseInterface;
 import com.parser.lk.services.vacanciesparser.VacanciesParser;
 import com.parser.lk.services.vacanciesparser.dto.HeadHunterFiltersParam;
 import org.springframework.http.MediaType;

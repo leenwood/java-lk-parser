@@ -1,12 +1,13 @@
 package com.parser.lk.services.applicationservice.applicationstatus;
 
 import com.parser.lk.services.applicationservice.StatusInterface;
+import org.springframework.stereotype.Service;
 
+@Service
 public class ParseStatusService implements StatusInterface {
 
-    private final String prevStatus = "CREATE_ORDER";
-    private final String currentStatus = "PARSING";
-    private final String nextStatus = "POST_PROCESSING";
+
+    private final String statusName = "PARSING";
 
 
     @Override
@@ -16,6 +17,6 @@ public class ParseStatusService implements StatusInterface {
 
     @Override
     public String getStatusName() {
-        return "PARSING";
+        return this.statusName;
     }
 }

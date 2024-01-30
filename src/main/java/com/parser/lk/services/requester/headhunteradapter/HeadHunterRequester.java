@@ -1,6 +1,6 @@
 package com.parser.lk.services.requester.headhunteradapter;
 
-import com.parser.lk.services.requester.dto.VacanciesResponseInterface;
+import com.parser.lk.services.requester.VacanciesResponseInterface;
 import com.parser.lk.services.requester.headhunteradapter.dto.VacanciesResponse;
 import com.parser.lk.services.vacanciesparser.dto.FilterParamInterface;
 import org.springframework.beans.factory.annotation.Autowired;
