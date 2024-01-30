@@ -1,10 +1,7 @@
 package com.parser.lk.controller;
 
 
-import com.parser.lk.services.requester.dto.PokemonAbilityInfoResponse;
-import com.parser.lk.services.requester.RequestService;
 import com.parser.lk.services.requester.dto.VacanciesResponseInterface;
-import com.parser.lk.services.requester.headhunteradapter.dto.VacanciesResponse;
 import com.parser.lk.services.vacanciesparser.VacanciesParser;
 import com.parser.lk.services.vacanciesparser.dto.HeadHunterFiltersParam;
 import org.springframework.http.MediaType;
@@ -16,31 +13,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class TestController {
 
     private final VacanciesParser vacanciesParser;
-    private final RequestService requestService;
 
-    public TestController(VacanciesParser vacanciesParser, RequestService requestService) {
+    public TestController(VacanciesParser vacanciesParser) {
         this.vacanciesParser = vacanciesParser;
-        this.requestService = requestService;
-    }
-
-    @RequestMapping(method = RequestMethod.GET, value = "/test", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String test() {
-        var Pokemon = this.requestService.getPokemon();
-        StringBuilder abilitiesNames = new StringBuilder();
-
-        for (PokemonAbilityInfoResponse tmpVar : Pokemon.getAbilities()) {
-            abilitiesNames.append(" ").append(tmpVar.getAbility().getName());
-        }
-
-        return abilitiesNames.toString();
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/vacancies", produces = MediaType.APPLICATION_JSON_VALUE)
     public VacanciesResponseInterface vacancies() {
         var filter = new HeadHunterFiltersParam();
-        filter.setPer_page(2);
-        var response = this.vacanciesParser.ParseVacancies(filter);
-        System.out.println(1);
         return null;
     }
 }

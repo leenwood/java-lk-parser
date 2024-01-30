@@ -35,3 +35,4 @@ build/
 
 ### docker ###
 docker/postgresql/data/
+docker/rabbitmq/data

@@ -1,6 +1,5 @@
 package com.parser.lk.services.requester.headhunteradapter;
 
-import com.parser.lk.services.requester.RequesterInterface;
 import com.parser.lk.services.requester.dto.VacanciesResponseInterface;
 import com.parser.lk.services.requester.headhunteradapter.dto.VacanciesResponse;
 import com.parser.lk.services.vacanciesparser.dto.FilterParamInterface;
@@ -11,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service("HeadHunterRequesterBean")
-public class HeadHunterRequester implements RequesterInterface {
+public class HeadHunterRequester {
     private final HeadHunterAdapterService headHunterAdapterService;
     private final RestTemplate restTemplate;
 
