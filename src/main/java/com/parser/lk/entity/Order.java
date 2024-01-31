@@ -10,6 +10,7 @@ import lombok.Setter;
 @Getter
 @Table(name = "parser_order")
 public class Order {
+
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;

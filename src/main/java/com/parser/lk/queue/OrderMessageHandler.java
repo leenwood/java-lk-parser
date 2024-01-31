@@ -1,29 +1,28 @@
 package com.parser.lk.queue;
 
 
+import com.parser.lk.services.applicationservice.ChangeStatusService;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+
 
 @EnableRabbit
 @Component
 public class OrderMessageHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(OrderMessageHandler.class);
+    private final ChangeStatusService changeStatusService;
 
+
+    @Autowired
+    public OrderMessageHandler(ChangeStatusService changeStatusService) {
+        this.changeStatusService = changeStatusService;
+    }
 
     @RabbitListener(queues = "orderQueue")
     public void receiverMessage(OrderMessage message) {
-        try {
-            logger.info("Received message from RabbitMQ: {}", message.toString());
-            // Ваш код обработки сообщения
-        } catch (Exception e) {
-            // Логирование ошибок
-            logger.error("Failed to process message", e);
-            // Можно бросить AmqpRejectAndDontRequeueException, чтобы сообщить RabbitMQ, что сообщение не должно повторно отправляться
-            throw new org.springframework.amqp.AmqpRejectAndDontRequeueException("Failed to process message", e);
-        }
+        this.changeStatusService.changeStatus(message);
     }
 }

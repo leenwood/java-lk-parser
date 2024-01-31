@@ -1,6 +1,7 @@
 package com.parser.lk.services.requester.sendrequest;
 
 
+import com.parser.lk.services.requester.sendrequest.dto.NotificationBodyRequest;
 import com.parser.lk.services.requester.sendrequest.dto.RequestResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -13,18 +14,22 @@ public class CallbackRequester {
 
     private final RestTemplate restTemplate;
 
-    @Autowired
-    public CallbackRequester(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    public CallbackRequester() {
+        this.restTemplate = new RestTemplate();
     }
 
 
-    public boolean sendCallback(String callbackUrl) {
-        ResponseEntity<RequestResponse> response = this.restTemplate.getForEntity(
+    public boolean sendCallback(String callbackUrl, NotificationBodyRequest message) {
+        ResponseEntity<RequestResponse> response = this.restTemplate.postForEntity(
                 callbackUrl,
+                message,
                 RequestResponse.class
         );
+        var bodyResponse = response.getBody();
+        if (bodyResponse == null) {
+            return false;
+        }
 
-        return response.getBody().isSuccess();
+        return bodyResponse.isSuccess();
     }
 }
