@@ -13,9 +13,6 @@ public class VacanciesParser {
 
     private final HeadHunterRequester headHunterRequester;
 
-    @Autowired @Qualifier("defaultConversionService") ConversionService conversionService;
-
-
     @Autowired
     public VacanciesParser(HeadHunterRequester headHunterRequester) {
         this.headHunterRequester = headHunterRequester;

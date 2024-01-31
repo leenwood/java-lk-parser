@@ -66,7 +66,7 @@ public class ChangeStatusService {
 
             this.messageSender.sendMessage(newMessage);
         } else {
-            this.notification.sendCallback("",
+            this.notification.sendCallback("https://stackoverflow.com",
                     new NotificationBodyRequest(
                             message.getCurrentStatus(),
                             message.getNextStatus(),
