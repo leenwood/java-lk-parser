@@ -1,13 +1,12 @@
 package com.parser.lk.services.requester.headhunteradapter.dto;
 
 
-import com.parser.lk.services.requester.VacanciesResponseInterface;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-public class VacanciesResponse implements VacanciesResponseInterface {
+public class VacanciesResponse {
 
     private int pages;
 

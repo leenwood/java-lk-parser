@@ -9,6 +9,7 @@ import com.parser.lk.services.requester.sendrequest.CallbackRequester;
 import com.parser.lk.services.requester.sendrequest.dto.NotificationBodyRequest;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import org.slf4j.Logger;
@@ -23,6 +24,10 @@ public class ChangeStatusService {
     private final CallbackRequester notification;
 
     private final MessageSender messageSender;
+
+
+    @Value("${application.callback.lk.users}")
+    private String callbackUrl;
 
     @Autowired
     public ChangeStatusService(OrderRepository orderRepository, ApplicationStatusFactory applicationStatusFactory, CallbackRequester notification, MessageSender messageSender) {
@@ -46,7 +51,7 @@ public class ChangeStatusService {
         );
 
         if (service.doProcess(message.getOrderId())) {
-            this.notification.sendCallback("",
+            this.notification.sendCallback(this.callbackUrl,
                     new NotificationBodyRequest(
                             message.getCurrentStatus(),
                             message.getNextStatus(),
@@ -66,7 +71,7 @@ public class ChangeStatusService {
 
             this.messageSender.sendMessage(newMessage);
         } else {
-            this.notification.sendCallback("https://stackoverflow.com",
+            this.notification.sendCallback(this.callbackUrl,
                     new NotificationBodyRequest(
                             message.getCurrentStatus(),
                             message.getNextStatus(),
