@@ -2,18 +2,17 @@ package com.parser.lk.services.requester.headhunteradapter;
 
 import com.parser.lk.services.requester.headhunteradapter.dto.VacanciesResponse;
 import com.parser.lk.services.vacanciesparser.dto.HeadHunterFiltersParam;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 @Service("HeadHunterRequesterBean")
@@ -26,7 +25,7 @@ public class HeadHunterRequester {
 
 
     public VacanciesResponse getVacancies(HeadHunterFiltersParam filters) {
-        String value = this.generateUrlVacancies(filters);
+        this.restTemplate.getMessageConverters().addFirst(new StringHttpMessageConverter(StandardCharsets.UTF_8));
         ResponseEntity<VacanciesResponse> response = this.restTemplate.exchange(
                 this.generateUrlVacancies(filters),
                 HttpMethod.GET,
@@ -45,7 +44,7 @@ public class HeadHunterRequester {
             uri.queryParam("only_with_salary", filtersParam.getOnlyWithSalary());
 
         if (filtersParam.getText() != null) {
-            uri.queryParam("text", URLEncoder.encode("php-программист", StandardCharsets.UTF_8));
+            uri.queryParam("text",  filtersParam.getText());
         }
 
         if (filtersParam.getPeriod() != null) uri.queryParam("period", filtersParam.getPeriod());
@@ -59,8 +58,7 @@ public class HeadHunterRequester {
                 .queryParam("page", filtersParam.getPage())
                 .queryParam("per_page", filtersParam.getPerPage())
                 .queryParam("no_magic", filtersParam.isNoMagic());
-
-        return uri.toUriString();
+        return uri.build().toUriString();
     }
 
     private HttpEntity<String> getConfiguration() {
