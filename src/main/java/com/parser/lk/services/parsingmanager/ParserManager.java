@@ -27,8 +27,8 @@ public class ParserManager {
     public void startWork(CreateOrderRequest createOrderObject) {
         Order order = new Order();
         order.setAllRegion(createOrderObject.isAllRegion());
-        order.setHasSalary(createOrderObject.isHasSalary());
-        order.setHasVmi(createOrderObject.isHasVmi());
+        order.setHasSalary(createOrderObject.getHasSalary());
+        order.setHasVmi(createOrderObject.getHasVmi());
         order.setStatus("START_PARSING");
         order.setTimestamp(createOrderObject.getTimestamp());
         order.setExternalId(createOrderObject.getExternalId());

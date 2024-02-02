@@ -11,7 +11,7 @@ public class Vacancies {
 
     private int page;
 
-    private int per_page;
+    private int perPage;
 
     private int found;
 

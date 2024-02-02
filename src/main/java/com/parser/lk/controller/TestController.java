@@ -8,7 +8,10 @@ import com.parser.lk.services.vacanciesparser.dto.vacancies.Vacancies;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 public class TestController {
@@ -23,16 +26,25 @@ public class TestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/vacancies", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Vacancies vacancies() {
+    public Vacancies vacancies(
+            @RequestParam(name = "text") String text,
+            @RequestParam(name = "onlyWithSalary") Boolean onlyWithSalary,
+            @RequestParam(name = "period") Integer period
+            ) {
         HeadHunterFiltersParam filters = new HeadHunterFiltersParam(
-                "php-программист",
-                true,
-                30,
+                text,
+                onlyWithSalary,
+                period,
                 "1",
                 "between1And3"
                 );
         var response = this.vacanciesParser.ParseHeadHunterVacancies(filters);
-        System.out.println("end");
-        return null;
+        return response;
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/areas", produces = MediaType.APPLICATION_JSON_VALUE)
+    public void areas() {
+        List<Integer> areas = this.vacanciesParser.getAreaIdsFromHeadHunter();
+        return;
     }
 }

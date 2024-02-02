@@ -1,7 +1,9 @@
 package com.parser.lk.services.requester.headhunteradapter;
 
+import com.parser.lk.services.requester.headhunteradapter.dto.AreaResponse;
 import com.parser.lk.services.requester.headhunteradapter.dto.VacanciesResponse;
 import com.parser.lk.services.vacanciesparser.dto.HeadHunterFiltersParam;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -11,17 +13,22 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 @Service("HeadHunterRequesterBean")
 public class HeadHunterRequester {
     private final RestTemplate restTemplate  = new RestTemplate();
 
-    private String private_api_key = "APPLSC5PEPV2IAA90AHF4HCOR9476BR4PEOG6URII746V57IIJGKIUL1160QU9OU";
+    @Value("${application.headhunter.api.key}")
+    private String private_api_key;
 
     private String base_url_address = "https://api.hh.ru/";
+
+    @Value("${application.useragent.lk.users}")
+    private String user_agent;
+
+    @Value("${application.areas.url}")
+    private String areasUrl;
 
 
     public VacanciesResponse getVacancies(HeadHunterFiltersParam filters) {
@@ -34,6 +41,17 @@ public class HeadHunterRequester {
         );
         return response.getBody();
     }
+
+    public AreaResponse getAreasByDictionary() {
+
+        return this.restTemplate.exchange(
+                this.areasUrl,
+                HttpMethod.GET,
+                this.getConfiguration(),
+                AreaResponse.class
+        ).getBody();
+    }
+
 
     private String generateUrlVacancies(HeadHunterFiltersParam filtersParam) {
         UriComponentsBuilder uri = UriComponentsBuilder
@@ -64,7 +82,7 @@ public class HeadHunterRequester {
     private HttpEntity<String> getConfiguration() {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + this.private_api_key);
-        headers.set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:122.0) Gecko/20100101 Firefox/122.0");
+        headers.set("User-Agent", this.user_agent);
         headers.set("content-type", "application/json; charset=UTF-8");
         return new HttpEntity<>(headers);
     }

@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Entity
 @Setter
 @Getter
@@ -21,13 +23,16 @@ public class Order {
 
     private int timestamp;
 
-    private String regionId;
+    @ElementCollection
+    private List<String> regionId;
 
     private boolean allRegion;
 
-    private boolean hasVmi;
+    private Boolean hasVmi;
 
-    private boolean hasSalary;
+    private Boolean hasSalary;
+
+    private String experience;
 
     private String externalId;
 

@@ -1,6 +1,7 @@
 package com.parser.lk.services.requester.headhunteradapter.dto;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.util.List;
@@ -12,7 +13,8 @@ public class VacanciesResponse {
 
     private int page;
 
-    private int per_page;
+    @JsonProperty("per_page")
+    private int perPage;
 
     private int found;
 

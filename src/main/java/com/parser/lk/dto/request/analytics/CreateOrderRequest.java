@@ -9,13 +9,15 @@ public class CreateOrderRequest {
 
     private int timestamp;
 
-    private String regionId;
+    private String[] regionId;
 
     private boolean allRegion;
 
-    private boolean hasVmi;
+    private Boolean hasVmi;
 
-    private boolean hasSalary;
+    private Boolean hasSalary;
+
+    private String experience;
 
     private String externalId;
 
