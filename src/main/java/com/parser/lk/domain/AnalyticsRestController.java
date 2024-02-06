@@ -33,8 +33,8 @@ public class AnalyticsRestController {
     @Async
     @PostMapping("/create/order")
     public CompletableFuture<SuccessResponse> startParsing(@RequestBody CreateOrderRequest createOrderObject) {
-
-        this.parserManager.startWork(createOrderObject);
+        var test = createOrderObject;
+//        this.parserManager.startWork(createOrderObject);
 
         SuccessResponse response = new SuccessResponse();
         response.setStatus(true);

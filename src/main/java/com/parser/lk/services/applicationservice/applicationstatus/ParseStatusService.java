@@ -48,7 +48,7 @@ public class ParseStatusService implements StatusInterface {
         if (order.isAllRegion()) {
             //TODO
         } else {
-            area = order.getRegionId();
+//            area = order.getRegionId();
         }
 
         HeadHunterFiltersParam filters = new HeadHunterFiltersParam(

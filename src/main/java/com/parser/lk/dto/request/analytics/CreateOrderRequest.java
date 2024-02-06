@@ -2,6 +2,8 @@ package com.parser.lk.dto.request.analytics;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class CreateOrderRequest {
 
@@ -9,7 +11,7 @@ public class CreateOrderRequest {
 
     private int timestamp;
 
-    private String[] regionId;
+    private List<String> regionId;
 
     private boolean allRegion;
 
