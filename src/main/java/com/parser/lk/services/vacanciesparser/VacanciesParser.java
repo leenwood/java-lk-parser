@@ -39,6 +39,7 @@ public class VacanciesParser {
             Vacancy vacancy = new Vacancy();
             vacancy.setOriginUrl(vacancyResponse.getOriginUrl());
             vacancy.setName(vacancyResponse.getName());
+            vacancy.setId(vacancyResponse.getId());
 
             Area area = new Area();
             area.setId(vacancyResponse.getArea().getId());
@@ -67,6 +68,27 @@ public class VacanciesParser {
             }
             vacancy.setEmployment(employment);
 
+
+            Experience experience;
+            if (vacancyResponse.getExperience() != null) {
+                experience = new Experience();
+                experience.setId(vacancyResponse.getExperience().getId());
+                experience.setName(vacancyResponse.getExperience().getName());
+            } else {
+                experience = null;
+            }
+            vacancy.setExperience(experience);
+
+            Schedule schedule;
+            if (vacancyResponse.getSchedule() != null) {
+                schedule = new Schedule();
+                schedule.setId(vacancyResponse.getSchedule().getId());
+                schedule.setName(vacancyResponse.getSchedule().getName());
+            } else {
+                schedule = null;
+            }
+            vacancy.setSchedule(schedule);
+
             vacanciesList.add(vacancy);
         }
 
@@ -83,6 +105,10 @@ public class VacanciesParser {
         }
 
         return areas;
+    }
+
+    public int getPagesVacanciesByFilter(HeadHunterFiltersParam filtersParam) {
+        return this.headHunterRequester.getPagesVacanciesByFilter(filtersParam);
     }
 
 }

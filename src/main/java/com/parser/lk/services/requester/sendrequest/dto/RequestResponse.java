@@ -5,6 +5,6 @@ import lombok.Data;
 @Data
 public class RequestResponse {
 
-    private boolean success;
+    private boolean status;
 
 }

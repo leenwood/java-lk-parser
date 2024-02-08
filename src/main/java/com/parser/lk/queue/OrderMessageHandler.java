@@ -23,6 +23,10 @@ public class OrderMessageHandler {
 
     @RabbitListener(queues = "orderQueue")
     public void receiverMessage(OrderMessage message) {
-        this.changeStatusService.changeStatus(message);
+        try {
+            this.changeStatusService.changeStatus(message);
+        } catch (Throwable throwable) {
+            System.out.println(throwable.toString());
+        }
     }
 }

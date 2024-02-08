@@ -52,6 +52,15 @@ public class HeadHunterRequester {
         ).getBody();
     }
 
+    public int getPagesVacanciesByFilter(HeadHunterFiltersParam filters) {
+        return this.restTemplate.exchange(
+                this.generateUrlVacancies(filters),
+                HttpMethod.GET,
+                this.getConfiguration(),
+                VacanciesResponse.class
+        ).getBody().getPages();
+    }
+
 
     private String generateUrlVacancies(HeadHunterFiltersParam filtersParam) {
         UriComponentsBuilder uri = UriComponentsBuilder

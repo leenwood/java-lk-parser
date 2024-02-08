@@ -18,4 +18,8 @@ public class VacancyResponse {
     private SalaryResponse salary;
 
     private EmploymentResponse employment;
+
+    private ExperienceResponse experience;
+
+    private ScheduleResponse schedule;
 }

@@ -30,6 +30,6 @@ public class CallbackRequester {
             return false;
         }
 
-        return bodyResponse.isSuccess();
+        return bodyResponse.isStatus();
     }
 }

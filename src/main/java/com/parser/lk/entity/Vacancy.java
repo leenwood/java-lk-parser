@@ -34,4 +34,6 @@ public class Vacancy {
 
     private String area;
 
+    private String externalId;
+
 }

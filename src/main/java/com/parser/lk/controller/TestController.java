@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -31,11 +32,17 @@ public class TestController {
             @RequestParam(name = "onlyWithSalary") Boolean onlyWithSalary,
             @RequestParam(name = "period") Integer period
             ) {
+
+        List<Integer> areas = new ArrayList<>();
+        areas.add(1620);
+        areas.add(1624);
+        areas.add(1);
+
         HeadHunterFiltersParam filters = new HeadHunterFiltersParam(
                 text,
                 onlyWithSalary,
                 period,
-                "1",
+                areas,
                 "between1And3"
                 );
         var response = this.vacanciesParser.ParseHeadHunterVacancies(filters);

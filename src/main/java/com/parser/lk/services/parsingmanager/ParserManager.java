@@ -10,6 +10,10 @@ import com.parser.lk.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class ParserManager {
 
@@ -24,7 +28,7 @@ public class ParserManager {
     }
 
 
-    public void startWork(CreateOrderRequest createOrderObject) {
+    public boolean startWork(CreateOrderRequest createOrderObject) {
         Order order = new Order();
         order.setAllRegion(createOrderObject.isAllRegion());
         order.setHasSalary(createOrderObject.getHasSalary());
@@ -44,6 +48,7 @@ public class ParserManager {
         orderMessage.setPrevStatus(null);
 
         this.messageSender.sendMessage(orderMessage);
+        return true;
     }
 
 

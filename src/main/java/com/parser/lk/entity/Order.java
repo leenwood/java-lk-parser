@@ -23,10 +23,10 @@ public class Order {
 
     private int timestamp;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private List<String> regionId;
 
-    private boolean allRegion;
+    private boolean allRegion = false;
 
     private Boolean hasVmi;
 

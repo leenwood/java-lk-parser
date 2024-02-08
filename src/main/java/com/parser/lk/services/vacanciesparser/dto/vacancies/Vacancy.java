@@ -16,4 +16,10 @@ public class Vacancy {
     private Salary salary;
 
     private Employment employment;
+
+    private Schedule schedule;
+
+    private Experience experience;
+
+    private String externalId;
 }

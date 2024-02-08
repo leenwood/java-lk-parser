@@ -1,16 +1,23 @@
 package com.parser.lk.services.applicationservice.applicationstatus;
 
 import com.parser.lk.entity.Order;
+import com.parser.lk.entity.Vacancy;
 import com.parser.lk.repository.OrderRepository;
+import com.parser.lk.repository.VacancyRepository;
 import com.parser.lk.services.applicationservice.StatusInterface;
 import com.parser.lk.services.vacanciesparser.VacanciesParser;
 import com.parser.lk.services.vacanciesparser.dto.HeadHunterFiltersParam;
 import com.parser.lk.services.vacanciesparser.dto.vacancies.Vacancies;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service("ParseStatusService")
 public class ParseStatusService implements StatusInterface {
@@ -19,19 +26,28 @@ public class ParseStatusService implements StatusInterface {
 
     private final OrderRepository orderRepository;
 
+    private final VacancyRepository vacancyRepository;
+
+    private final Logger logger = LoggerFactory.getLogger(ParseStatusService.class);
+
+
 
     private final String statusName = "PARSING";
 
     private final String nextStatus = "POST_PROCESSING";
 
+    @Value("${application.period.parse.vacancies}")
+    private Integer period;
+
 
     @Autowired
     public ParseStatusService(
             VacanciesParser vacanciesParser,
-            OrderRepository orderRepository
+            OrderRepository orderRepository, VacancyRepository vacancyRepository
     ) {
         this.vacanciesParser = vacanciesParser;
         this.orderRepository = orderRepository;
+        this.vacancyRepository = vacancyRepository;
     }
 
 
@@ -43,29 +59,80 @@ public class ParseStatusService implements StatusInterface {
         }
         Order order = orderOptional.get();
 
+        List<Integer> area;
 
-        String area = null;
         if (order.isAllRegion()) {
-            //TODO
+            area = this.getAllRegionsId();
+            for (Integer cursor : area) {
+                List<Integer> areaCursor = new ArrayList<>();
+                areaCursor.add(cursor);
+                HeadHunterFiltersParam filters = new HeadHunterFiltersParam(
+                        order.getSearchText(),
+                        order.getHasSalary(),
+                        this.period,
+                        areaCursor,
+                        order.getExperience()
+                );
+                int pages = this.vacanciesParser.getPagesVacanciesByFilter(filters);
+                System.out.printf("Количество страниц %s%n", pages);
+                parseVacancies(filters, pages);
+            }
         } else {
-//            area = order.getRegionId();
+            area = order.getRegionId().stream().map(Integer::parseInt).collect(Collectors.toList());
+            HeadHunterFiltersParam filters = new HeadHunterFiltersParam(
+                    order.getSearchText(),
+                    order.getHasSalary(),
+                    this.period,
+                    area,
+                    order.getExperience()
+            );
+            int pages = this.vacanciesParser.getPagesVacanciesByFilter(filters);
+            System.out.printf("Количество страниц %s%n", pages);
+            parseVacancies(filters, pages);
         }
 
-        HeadHunterFiltersParam filters = new HeadHunterFiltersParam(
-                order.getSearchText(),
-                order.getHasSalary(),
-                14,
-                area,
-                order.getExperience()
-        );
 
-        Vacancies vacancies = this.vacanciesParser.ParseHeadHunterVacancies(filters);
 
-        return false;
+
+
+
+        return true;
+    }
+
+    private void parseVacancies(HeadHunterFiltersParam filters, int pages) {
+        for (int currentPage = filters.getPage(); currentPage < pages; currentPage++) {
+            filters.setPage(currentPage);
+            Vacancies vacancies = this.vacanciesParser.ParseHeadHunterVacancies(filters);
+            System.out.printf("Текущая страница %s | Всего вакансий найдено %s%n", currentPage, vacancies.getFound());
+            for (com.parser.lk.services.vacanciesparser.dto.vacancies.Vacancy vacancy : vacancies.getVacancies()) {
+                Vacancy transformVacancy = this.transformToVacancy(vacancy);
+                this.vacancyRepository.save(transformVacancy);
+
+                if (transformVacancy.getId() < 0) {
+                    this.logger.error(String.format(
+                            "ParseStatusService::doProcess | Не удалось сохранить вакансию с externalId %s в БД",
+                            transformVacancy.getExternalId())
+                    );
+                }
+            }
+
+        }
     }
 
     private List<Integer> getAllRegionsId() {
         return this.vacanciesParser.getAreaIdsFromHeadHunter();
+    }
+
+    private Vacancy transformToVacancy(com.parser.lk.services.vacanciesparser.dto.vacancies.Vacancy vacancy) {
+        Vacancy vacancyTransform = new Vacancy();
+        vacancyTransform.setArea(vacancy.getArea().getId());
+        vacancyTransform.setExperience(vacancy.getExperience().getId());
+        vacancyTransform.setName(vacancy.getName());
+        vacancyTransform.setExternalId(vacancy.getId());
+        vacancyTransform.setEmployment(vacancy.getEmployment().getId());
+        vacancyTransform.setSchedule(vacancy.getSchedule().getId());
+        vacancyTransform.setExperience(vacancy.getExperience().getId());
+        return vacancyTransform;
     }
 
     @Override
