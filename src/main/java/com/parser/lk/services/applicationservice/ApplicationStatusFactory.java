@@ -19,6 +19,10 @@ public class ApplicationStatusFactory {
         switch (nextStatusOrder) {
             case "PARSING":
                 return this.context.getBean("ParseStatusService", StatusInterface.class);
+            case "POST_PROCESSING":
+                return this.context.getBean("PostProcessingStatusService", StatusInterface.class);
+            case "PARSING_ERROR":
+                return this.context.getBean("ParsingErrorStatusService", StatusInterface.class);
             default:
                 logger.error(String.format("Invalid status order: %s. (Not found)", nextStatusOrder));
                 return null;

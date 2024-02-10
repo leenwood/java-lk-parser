@@ -2,6 +2,7 @@ package com.parser.lk.services.requester.headhunteradapter;
 
 import com.parser.lk.services.requester.headhunteradapter.dto.AreaResponse;
 import com.parser.lk.services.requester.headhunteradapter.dto.VacanciesResponse;
+import com.parser.lk.services.requester.headhunteradapter.dto.VacancyResponse;
 import com.parser.lk.services.vacanciesparser.dto.HeadHunterFiltersParam;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -62,6 +63,18 @@ public class HeadHunterRequester {
     }
 
 
+    public VacancyResponse getVacancyById(String id) {
+        this.restTemplate.getMessageConverters().addFirst(new StringHttpMessageConverter(StandardCharsets.UTF_8));
+        ResponseEntity<VacancyResponse> response = this.restTemplate.exchange(
+                this.generateUrlVacancy(id),
+                HttpMethod.GET,
+                this.getConfiguration(),
+                VacancyResponse.class
+        );
+        return response.getBody();
+    }
+
+
     private String generateUrlVacancies(HeadHunterFiltersParam filtersParam) {
         UriComponentsBuilder uri = UriComponentsBuilder
                 .fromHttpUrl(this.base_url_address)
@@ -88,6 +101,13 @@ public class HeadHunterRequester {
         return uri.build().toUriString();
     }
 
+    private String generateUrlVacancy(String id) {
+        UriComponentsBuilder uri = UriComponentsBuilder
+                .fromHttpUrl(this.base_url_address)
+                .path(String.format("/vacancies/%s", id));
+        return uri.build().toUriString();
+    }
+
     private HttpEntity<String> getConfiguration() {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + this.private_api_key);
@@ -95,4 +115,5 @@ public class HeadHunterRequester {
         headers.set("content-type", "application/json; charset=UTF-8");
         return new HttpEntity<>(headers);
     }
+
 }

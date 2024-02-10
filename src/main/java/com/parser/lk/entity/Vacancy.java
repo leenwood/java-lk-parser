@@ -36,4 +36,8 @@ public class Vacancy {
 
     private String externalId;
 
+    private String guid;
+
+    private boolean processed = false;
+
 }

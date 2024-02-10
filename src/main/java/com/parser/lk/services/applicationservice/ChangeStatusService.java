@@ -5,6 +5,7 @@ import com.parser.lk.queue.MessageSender;
 import com.parser.lk.queue.OrderMessage;
 import com.parser.lk.queue.OrderMessageHandler;
 import com.parser.lk.repository.OrderRepository;
+import com.parser.lk.services.parsingmanager.ParserManager;
 import com.parser.lk.services.requester.sendrequest.CallbackRequester;
 import com.parser.lk.services.requester.sendrequest.dto.NotificationBodyRequest;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Service;
 
 import org.slf4j.Logger;
 
+import java.util.Objects;
+
 @Service
 public class ChangeStatusService {
 
@@ -21,20 +24,25 @@ public class ChangeStatusService {
     private final Logger logger = LoggerFactory.getLogger(OrderMessageHandler.class);
     private final ApplicationStatusFactory applicationStatusFactory;
 
-    private final CallbackRequester notification;
+    private final ParserManager parserManager;
 
-    private final MessageSender messageSender;
+    private final CallbackRequester notification;
 
 
     @Value("${application.callback.lk.users}")
     private String callbackUrl;
 
     @Autowired
-    public ChangeStatusService(OrderRepository orderRepository, ApplicationStatusFactory applicationStatusFactory, CallbackRequester notification, MessageSender messageSender) {
+    public ChangeStatusService(
+            OrderRepository orderRepository,
+            ApplicationStatusFactory applicationStatusFactory,
+            ParserManager parserManager,
+            CallbackRequester notification
+    ) {
         this.orderRepository = orderRepository;
         this.applicationStatusFactory = applicationStatusFactory;
+        this.parserManager = parserManager;
         this.notification = notification;
-        this.messageSender = messageSender;
     }
 
     public void changeStatus(OrderMessage message) {
@@ -44,6 +52,8 @@ public class ChangeStatusService {
             this.logger.warn(String.format("object by id %s not found.", message.getOrderId()));
             return;
         }
+
+        System.out.println(message);
 
         StatusInterface service = this.applicationStatusFactory.getStatusService(
                 message.getNextStatus(),
@@ -60,16 +70,21 @@ public class ChangeStatusService {
                             message.getOrderId())
             );
 
-            order.setStatus(message.getNextStatus());
+
+            order.setStatus(service.getStatusName());
             this.orderRepository.save(order);
 
-            OrderMessage newMessage = new OrderMessage();
-            newMessage.setPrevStatus(message.getCurrentStatus());
-            newMessage.setCurrentStatus(message.getNextStatus());
-            newMessage.setNextStatus(service.getNextStatusName());
-            newMessage.setOrderId(message.getOrderId());
+            if (service.getNextStatusName() != null) {
+                this.parserManager.changeStatusQueue(
+                        message.getCurrentStatus(),
+                        service.getNextStatusName(),
+                        service.getStatusName(),
+                        message.getOrderId()
+                );
+            } else if (Objects.equals(service.getStatusName(), NameStatusServiceEnum.COMPLETE)) {
+                return;
+            }
 
-            this.messageSender.sendMessage(newMessage);
         } else {
             this.notification.sendCallback(this.callbackUrl,
                     new NotificationBodyRequest(
@@ -79,6 +94,16 @@ public class ChangeStatusService {
                             false,
                             message.getOrderId())
             );
+
+            if (service.getNextStatusName() != null) {
+                this.parserManager.changeStatusQueue(
+                        message.getCurrentStatus(),
+                        NameStatusServiceEnum.PARSING_ERROR,
+                        service.getStatusName(),
+                        message.getOrderId()
+                );
+            }
+
         }
     }
 

@@ -7,6 +7,7 @@ import com.parser.lk.entity.Order;
 import com.parser.lk.queue.MessageSender;
 import com.parser.lk.queue.OrderMessage;
 import com.parser.lk.repository.OrderRepository;
+import com.parser.lk.services.applicationservice.NameStatusServiceEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,7 +34,7 @@ public class ParserManager {
         order.setAllRegion(createOrderObject.isAllRegion());
         order.setHasSalary(createOrderObject.getHasSalary());
         order.setHasVmi(createOrderObject.getHasVmi());
-        order.setStatus("START_PARSING");
+        order.setStatus(NameStatusServiceEnum.START_PARSING);
         order.setTimestamp(createOrderObject.getTimestamp());
         order.setExternalId(createOrderObject.getExternalId());
         order.setRegionId(createOrderObject.getRegionId());
@@ -41,14 +42,24 @@ public class ParserManager {
 
         var saveOrder = this.orderRepository.save(order);
 
-        OrderMessage orderMessage = new OrderMessage();
-        orderMessage.setOrderId(saveOrder.getId());
-        orderMessage.setNextStatus("PARSING");
-        orderMessage.setCurrentStatus("START_PARSING");
-        orderMessage.setPrevStatus(null);
-
-        this.messageSender.sendMessage(orderMessage);
+        this.changeStatusQueue(
+                null,
+                NameStatusServiceEnum.PARSING,
+                NameStatusServiceEnum.START_PARSING,
+                saveOrder.getId()
+        );
         return true;
+    }
+
+    public void changeStatusQueue(String prevStatus, String nextStatus, String currentStatus, Long orderId) {
+
+        OrderMessage newMessage = new OrderMessage();
+        newMessage.setPrevStatus(prevStatus);
+        newMessage.setCurrentStatus(currentStatus);
+        newMessage.setNextStatus(nextStatus);
+        newMessage.setOrderId(orderId);
+
+        this.messageSender.sendMessage(newMessage);
     }
 
 

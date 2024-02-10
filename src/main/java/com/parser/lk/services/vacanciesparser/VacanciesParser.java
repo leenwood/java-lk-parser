@@ -36,58 +36,7 @@ public class VacanciesParser {
         List<Vacancy> vacanciesList = new ArrayList<>();
 
         for (VacancyResponse vacancyResponse : vacanciesResponse.getItems()) {
-            Vacancy vacancy = new Vacancy();
-            vacancy.setOriginUrl(vacancyResponse.getOriginUrl());
-            vacancy.setName(vacancyResponse.getName());
-            vacancy.setId(vacancyResponse.getId());
-
-            Area area = new Area();
-            area.setId(vacancyResponse.getArea().getId());
-            area.setName(vacancyResponse.getArea().getName());
-            vacancy.setArea(area);
-
-            Salary salary;
-            if (vacancyResponse.getSalary() != null) {
-                salary = new Salary();
-                salary.setCurrency(vacancyResponse.getSalary().getCurrency());
-                salary.setSalaryGross(vacancyResponse.getSalary().isSalaryGross());
-                salary.setSalaryFrom(vacancyResponse.getSalary().getSalaryFrom());
-                salary.setSalaryTo(vacancyResponse.getSalary().getSalaryTo());
-            } else {
-                salary = null;
-            }
-            vacancy.setSalary(salary);
-
-            Employment employment;
-            if (vacancyResponse.getEmployment() != null) {
-                employment = new Employment();
-                employment.setName(vacancyResponse.getEmployment().getName());
-                employment.setId(vacancyResponse.getEmployment().getId());
-            } else {
-                employment = null;
-            }
-            vacancy.setEmployment(employment);
-
-
-            Experience experience;
-            if (vacancyResponse.getExperience() != null) {
-                experience = new Experience();
-                experience.setId(vacancyResponse.getExperience().getId());
-                experience.setName(vacancyResponse.getExperience().getName());
-            } else {
-                experience = null;
-            }
-            vacancy.setExperience(experience);
-
-            Schedule schedule;
-            if (vacancyResponse.getSchedule() != null) {
-                schedule = new Schedule();
-                schedule.setId(vacancyResponse.getSchedule().getId());
-                schedule.setName(vacancyResponse.getSchedule().getName());
-            } else {
-                schedule = null;
-            }
-            vacancy.setSchedule(schedule);
+            Vacancy vacancy = this.transformVacancy(vacancyResponse);
 
             vacanciesList.add(vacancy);
         }
@@ -95,6 +44,66 @@ public class VacanciesParser {
         vacancies.setVacancies(vacanciesList);
 
         return vacancies;
+    }
+
+    private Vacancy transformVacancy(VacancyResponse vacancyResponse) {
+        Vacancy vacancy = new Vacancy();
+        vacancy.setOriginUrl(vacancyResponse.getOriginUrl());
+        vacancy.setName(vacancyResponse.getName());
+        vacancy.setId(vacancyResponse.getId());
+
+        Area area = new Area();
+        area.setId(vacancyResponse.getArea().getId());
+        area.setName(vacancyResponse.getArea().getName());
+        vacancy.setArea(area);
+
+        Salary salary;
+        if (vacancyResponse.getSalary() != null) {
+            salary = new Salary();
+            salary.setCurrency(vacancyResponse.getSalary().getCurrency());
+            salary.setSalaryGross(vacancyResponse.getSalary().isSalaryGross());
+            salary.setSalaryFrom(vacancyResponse.getSalary().getSalaryFrom());
+            salary.setSalaryTo(vacancyResponse.getSalary().getSalaryTo());
+        } else {
+            salary = null;
+        }
+        vacancy.setSalary(salary);
+
+        Employment employment;
+        if (vacancyResponse.getEmployment() != null) {
+            employment = new Employment();
+            employment.setName(vacancyResponse.getEmployment().getName());
+            employment.setId(vacancyResponse.getEmployment().getId());
+        } else {
+            employment = null;
+        }
+        vacancy.setEmployment(employment);
+
+
+        Experience experience;
+        if (vacancyResponse.getExperience() != null) {
+            experience = new Experience();
+            experience.setId(vacancyResponse.getExperience().getId());
+            experience.setName(vacancyResponse.getExperience().getName());
+        } else {
+            experience = null;
+        }
+        vacancy.setExperience(experience);
+
+        Schedule schedule;
+        if (vacancyResponse.getSchedule() != null) {
+            schedule = new Schedule();
+            schedule.setId(vacancyResponse.getSchedule().getId());
+            schedule.setName(vacancyResponse.getSchedule().getName());
+        } else {
+            schedule = null;
+        }
+        vacancy.setSchedule(schedule);
+        return vacancy;
+    }
+
+    public Vacancy getVacancyById(String id) {
+        return this.transformVacancy(this.headHunterRequester.getVacancyById(id));
     }
 
     public List<Integer> getAreaIdsFromHeadHunter() {

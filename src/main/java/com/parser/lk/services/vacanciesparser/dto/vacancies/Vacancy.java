@@ -11,6 +11,8 @@ public class Vacancy {
 
     private String originUrl;
 
+    private String description;
+
     private Area area;
 
     private Salary salary;

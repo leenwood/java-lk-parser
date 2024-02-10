@@ -4,6 +4,7 @@ import com.parser.lk.entity.Order;
 import com.parser.lk.entity.Vacancy;
 import com.parser.lk.repository.OrderRepository;
 import com.parser.lk.repository.VacancyRepository;
+import com.parser.lk.services.applicationservice.NameStatusServiceEnum;
 import com.parser.lk.services.applicationservice.StatusInterface;
 import com.parser.lk.services.vacanciesparser.VacanciesParser;
 import com.parser.lk.services.vacanciesparser.dto.HeadHunterFiltersParam;
@@ -20,7 +21,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service("ParseStatusService")
-public class ParseStatusService implements StatusInterface {
+public class ParseService implements StatusInterface {
 
     private final VacanciesParser vacanciesParser;
 
@@ -28,20 +29,14 @@ public class ParseStatusService implements StatusInterface {
 
     private final VacancyRepository vacancyRepository;
 
-    private final Logger logger = LoggerFactory.getLogger(ParseStatusService.class);
-
-
-
-    private final String statusName = "PARSING";
-
-    private final String nextStatus = "POST_PROCESSING";
+    private final Logger logger = LoggerFactory.getLogger(ParseService.class);
 
     @Value("${application.period.parse.vacancies}")
     private Integer period;
 
 
     @Autowired
-    public ParseStatusService(
+    public ParseService(
             VacanciesParser vacanciesParser,
             OrderRepository orderRepository, VacancyRepository vacancyRepository
     ) {
@@ -60,9 +55,18 @@ public class ParseStatusService implements StatusInterface {
         Order order = orderOptional.get();
 
         List<Integer> area;
-
+        boolean parseMultiRegion = false;
         if (order.isAllRegion()) {
+            area = order.getRegionId().stream().map(Integer::parseInt).collect(Collectors.toList());
+            parseMultiRegion = true;
+        } else if (order.getRegionId().size() > 1) {
+            parseMultiRegion = true;
             area = this.getAllRegionsId();
+        } else {
+            area = order.getRegionId().stream().map(Integer::parseInt).collect(Collectors.toList());
+        }
+
+        if (parseMultiRegion) {
             for (Integer cursor : area) {
                 List<Integer> areaCursor = new ArrayList<>();
                 areaCursor.add(cursor);
@@ -75,10 +79,9 @@ public class ParseStatusService implements StatusInterface {
                 );
                 int pages = this.vacanciesParser.getPagesVacanciesByFilter(filters);
                 System.out.printf("Количество страниц %s%n", pages);
-                parseVacancies(filters, pages);
+                parseVacancies(filters, pages, order.getExternalId());
             }
         } else {
-            area = order.getRegionId().stream().map(Integer::parseInt).collect(Collectors.toList());
             HeadHunterFiltersParam filters = new HeadHunterFiltersParam(
                     order.getSearchText(),
                     order.getHasSalary(),
@@ -88,24 +91,20 @@ public class ParseStatusService implements StatusInterface {
             );
             int pages = this.vacanciesParser.getPagesVacanciesByFilter(filters);
             System.out.printf("Количество страниц %s%n", pages);
-            parseVacancies(filters, pages);
+            parseVacancies(filters, pages, order.getExternalId());
         }
-
-
-
-
-
 
         return true;
     }
 
-    private void parseVacancies(HeadHunterFiltersParam filters, int pages) {
+    private void parseVacancies(HeadHunterFiltersParam filters, int pages, String guid) {
         for (int currentPage = filters.getPage(); currentPage < pages; currentPage++) {
             filters.setPage(currentPage);
             Vacancies vacancies = this.vacanciesParser.ParseHeadHunterVacancies(filters);
             System.out.printf("Текущая страница %s | Всего вакансий найдено %s%n", currentPage, vacancies.getFound());
             for (com.parser.lk.services.vacanciesparser.dto.vacancies.Vacancy vacancy : vacancies.getVacancies()) {
                 Vacancy transformVacancy = this.transformToVacancy(vacancy);
+                transformVacancy.setGuid(guid);
                 this.vacancyRepository.save(transformVacancy);
 
                 if (transformVacancy.getId() < 0) {
@@ -125,23 +124,23 @@ public class ParseStatusService implements StatusInterface {
 
     private Vacancy transformToVacancy(com.parser.lk.services.vacanciesparser.dto.vacancies.Vacancy vacancy) {
         Vacancy vacancyTransform = new Vacancy();
+        vacancyTransform.setName(vacancy.getName());
+        vacancyTransform.setOriginalUrl(vacancy.getOriginUrl());
         vacancyTransform.setArea(vacancy.getArea().getId());
         vacancyTransform.setExperience(vacancy.getExperience().getId());
-        vacancyTransform.setName(vacancy.getName());
         vacancyTransform.setExternalId(vacancy.getId());
         vacancyTransform.setEmployment(vacancy.getEmployment().getId());
         vacancyTransform.setSchedule(vacancy.getSchedule().getId());
-        vacancyTransform.setExperience(vacancy.getExperience().getId());
         return vacancyTransform;
     }
 
     @Override
     public String getStatusName() {
-        return this.statusName;
+        return NameStatusServiceEnum.PARSING;
     }
 
     @Override
     public String getNextStatusName() {
-        return this.nextStatus;
+        return NameStatusServiceEnum.POST_PROCESSING;
     }
 }
