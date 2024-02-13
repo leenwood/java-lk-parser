@@ -2,6 +2,7 @@ package com.parser.lk.controller;
 
 
 import com.parser.lk.services.applicationservice.ChangeStatusService;
+import com.parser.lk.services.applicationservice.applicationstatus.PostProcessingService;
 import com.parser.lk.services.vacanciesparser.VacanciesParser;
 import com.parser.lk.services.vacanciesparser.dto.HeadHunterFiltersParam;
 import com.parser.lk.services.vacanciesparser.dto.vacancies.Vacancies;
@@ -19,10 +20,13 @@ public class TestController {
 
     private final ChangeStatusService changeStatusService;
 
+    private final PostProcessingService postProcessingService;
+
     private final VacanciesParser vacanciesParser;
 
-    public TestController(ChangeStatusService changeStatusService, VacanciesParser vacanciesParser) {
+    public TestController(ChangeStatusService changeStatusService, PostProcessingService postProcessingService, VacanciesParser vacanciesParser) {
         this.changeStatusService = changeStatusService;
+        this.postProcessingService = postProcessingService;
         this.vacanciesParser = vacanciesParser;
     }
 
@@ -43,7 +47,11 @@ public class TestController {
                 onlyWithSalary,
                 period,
                 areas,
-                "between1And3"
+                "between1And3",
+                null,
+                null,
+                null,
+                null
                 );
         var response = this.vacanciesParser.ParseHeadHunterVacancies(filters);
         return response;
@@ -52,6 +60,12 @@ public class TestController {
     @RequestMapping(method = RequestMethod.GET, value = "/areas", produces = MediaType.APPLICATION_JSON_VALUE)
     public void areas() {
         List<Integer> areas = this.vacanciesParser.getAreaIdsFromHeadHunter();
+        return;
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/test1", produces = MediaType.APPLICATION_JSON_VALUE)
+    public void test1() {
+        this.postProcessingService.doProcess(2902L);
         return;
     }
 }

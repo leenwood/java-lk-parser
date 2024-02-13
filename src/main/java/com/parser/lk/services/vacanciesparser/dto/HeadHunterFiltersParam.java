@@ -28,11 +28,36 @@ public class HeadHunterFiltersParam {
 
     private boolean noMagic = true;
 
-    public HeadHunterFiltersParam(String text, Boolean onlyWithSalary, Integer period, List<Integer> area, String experience) {
+    private List<String> industries;
+
+    /** График */
+    private String schedule;
+
+    /** Тип занятонсти */
+    private String employment;
+
+    private List<String> vacancySearchFields;
+
+
+    public HeadHunterFiltersParam(
+            String text,
+            Boolean onlyWithSalary,
+            Integer period,
+            List<Integer> area,
+            String experience,
+            String schedule,
+            String employment,
+            List<String> vacancySearchFields,
+            List<String> industries
+    ) {
         this.text = text;
         this.onlyWithSalary = onlyWithSalary;
         this.period = period;
         this.area = area;
         this.experience = experience;
+        this.schedule = schedule;
+        this.employment = employment;
+        this.vacancySearchFields = vacancySearchFields;
+        this.industries = industries;
     }
 }

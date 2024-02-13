@@ -55,43 +55,29 @@ public class ParseService implements StatusInterface {
         Order order = orderOptional.get();
 
         List<Integer> area;
-        boolean parseMultiRegion = false;
         if (order.isAllRegion()) {
-            area = order.getRegionId().stream().map(Integer::parseInt).collect(Collectors.toList());
-            parseMultiRegion = true;
-        } else if (order.getRegionId().size() > 1) {
-            parseMultiRegion = true;
             area = this.getAllRegionsId();
         } else {
-            area = order.getRegionId().stream().map(Integer::parseInt).collect(Collectors.toList());
+            area = order.getRegionId();
         }
 
-        if (parseMultiRegion) {
-            for (Integer cursor : area) {
-                List<Integer> areaCursor = new ArrayList<>();
-                areaCursor.add(cursor);
-                HeadHunterFiltersParam filters = new HeadHunterFiltersParam(
-                        order.getSearchText(),
-                        order.getHasSalary(),
-                        this.period,
-                        areaCursor,
-                        order.getExperience()
-                );
-                int pages = this.vacanciesParser.getPagesVacanciesByFilter(filters);
-                System.out.printf("Количество страниц %s%n", pages);
-                parseVacancies(filters, pages, order.getExternalId());
-            }
-        } else {
+        for (Integer cursor : area) {
+            List<Integer> areaCursor = new ArrayList<>();
+            areaCursor.add(cursor);
             HeadHunterFiltersParam filters = new HeadHunterFiltersParam(
                     order.getSearchText(),
                     order.getHasSalary(),
                     this.period,
-                    area,
-                    order.getExperience()
+                    areaCursor,
+                    order.getExperience(),
+                    order.getSchedule(),
+                    order.getEmployment(),
+                    order.getVacancySearchFields(),
+                    order.getIndustries()
             );
             int pages = this.vacanciesParser.getPagesVacanciesByFilter(filters);
             System.out.printf("Количество страниц %s%n", pages);
-            parseVacancies(filters, pages, order.getExternalId());
+            parseVacancies(filters, pages, order.getGuid());
         }
 
         return true;

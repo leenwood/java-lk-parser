@@ -9,7 +9,7 @@ import java.util.List;
 @Repository
 public interface VacancyRepository extends CrudRepository<Vacancy, Long> {
 
-    public Vacancy findOneByGuidAndProcessed(String guid, boolean processed);
+    public Vacancy findFirstByGuidAndProcessed(String guid, boolean processed);
 
     public Integer countByGuidAndProcessed(String guid, boolean processed);
 

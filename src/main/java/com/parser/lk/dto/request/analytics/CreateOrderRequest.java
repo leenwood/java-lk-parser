@@ -11,7 +11,7 @@ public class CreateOrderRequest {
 
     private int timestamp;
 
-    private List<String> regionId;
+    private List<Integer> regionId;
 
     private boolean allRegion;
 
@@ -20,6 +20,16 @@ public class CreateOrderRequest {
     private Boolean hasSalary;
 
     private String experience;
+
+    private List<String> industries;
+
+    /** График */
+    private String schedule;
+
+    /** Тип занятонсти */
+    private String employment;
+
+    private List<String> vacancySearchFields;
 
     private String externalId;
 

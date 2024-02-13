@@ -4,8 +4,8 @@ services:
     image: postgres:15
     container_name: "db-postgresql"
     # раскоменитить для сохранения БД
-    #    volumes:
-    #      - ./docker/postgresql/data/:/var/lib/postgresql/data/
+#    volumes:
+#      - ./docker/postgresql/data/:/var/lib/postgresql/data/
     environment:
       - POSTGRES_DB=parser_db
       - POSTGRES_USER=parser_user
@@ -22,3 +22,4 @@ services:
       RABBITMQ_DEFAULT_PASS: root
 #    volumes:
 #      - ./docker/rabbitmq/data/:/var/lib/rabbitmq
+

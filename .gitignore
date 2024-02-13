@@ -36,3 +36,4 @@ build/
 ### docker ###
 docker/postgresql/data/
 docker/rabbitmq/data
+docker-compose.yml

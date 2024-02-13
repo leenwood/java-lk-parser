@@ -34,8 +34,10 @@ public class Vacancy {
 
     private String area;
 
+    /** Ид вакансиии с ХХ */
     private String externalId;
 
+    /** Ид от Димы Старцева */
     private String guid;
 
     private boolean processed = false;

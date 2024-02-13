@@ -93,11 +93,22 @@ public class HeadHunterRequester {
 
         if (filtersParam.getExperience() != null) uri.queryParam("experience", filtersParam.getExperience());
 
+        if (filtersParam.getEmployment() != null) uri.queryParam("employment", filtersParam.getEmployment());
+
+        if (filtersParam.getSchedule() != null) uri.queryParam("schedule", filtersParam.getSchedule());
+
+        if (filtersParam.getIndustries() != null) uri.queryParam("industry", filtersParam.getIndustries());
+
+        if (filtersParam.getVacancySearchFields() != null) {
+            uri.queryParam("search_field", filtersParam.getVacancySearchFields());
+        }
+
         // Базовые методы которые нулл не могут быть
         uri
                 .queryParam("page", filtersParam.getPage())
                 .queryParam("per_page", filtersParam.getPerPage())
                 .queryParam("no_magic", filtersParam.isNoMagic());
+        System.out.println(uri.build().toUriString());
         return uri.build().toUriString();
     }
 

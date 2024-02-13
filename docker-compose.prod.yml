@@ -1,11 +1,10 @@
 version: "3.7"
 services:
   postgresql:
-    image: postgres:15
+    image: postgres:15-alpine
     container_name: "db-postgresql"
-    # раскоменитить для сохранения БД
-    #    volumes:
-    #      - ./docker/postgresql/data/:/var/lib/postgresql/data/
+    volumes:
+      - ./docker/postgresql/data/:/var/lib/postgresql/data/
     environment:
       - POSTGRES_DB=parser_db
       - POSTGRES_USER=parser_user
@@ -13,12 +12,12 @@ services:
     ports:
       - "5432:5432"
   rabbitMq:
-    image: rabbitmq:3.9-management
+    image: rabbitmq:3.19-alpine
     ports:
       - "5672:5672" # Основной порт для очереди из под приложения (AMQP)
-      - "15672:15672" # Порт для интерфейса
     environment:
       RABBITMQ_DEFAULT_USER: root
       RABBITMQ_DEFAULT_PASS: root
-#    volumes:
-#      - ./docker/rabbitmq/data/:/var/lib/rabbitmq
+    volumes:
+      - ./docker/rabbitmq/data/:/var/lib/rabbitmq
+

@@ -24,7 +24,7 @@ public class Order {
     private int timestamp;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    private List<String> regionId;
+    private List<Integer> regionId;
 
     private boolean allRegion = false;
 
@@ -34,6 +34,19 @@ public class Order {
 
     private String experience;
 
-    private String externalId;
+    @ElementCollection(fetch = FetchType.EAGER)
+    private List<String> industries;
+
+    /** График */
+    private String schedule;
+
+    /** Тип занятонсти */
+    private String employment;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    private List<String> vacancySearchFields;
+
+    /** Ид приходяший от димы, именуется как GUID */
+    private String guid;
 
 }

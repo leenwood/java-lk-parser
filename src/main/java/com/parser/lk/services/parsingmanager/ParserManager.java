@@ -1,7 +1,6 @@
 package com.parser.lk.services.parsingmanager;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.parser.lk.dto.request.analytics.CreateOrderRequest;
 import com.parser.lk.entity.Order;
 import com.parser.lk.queue.MessageSender;
@@ -10,10 +9,6 @@ import com.parser.lk.repository.OrderRepository;
 import com.parser.lk.services.applicationservice.NameStatusServiceEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ParserManager {
@@ -36,9 +31,14 @@ public class ParserManager {
         order.setHasVmi(createOrderObject.getHasVmi());
         order.setStatus(NameStatusServiceEnum.START_PARSING);
         order.setTimestamp(createOrderObject.getTimestamp());
-        order.setExternalId(createOrderObject.getExternalId());
+        order.setGuid(createOrderObject.getExternalId());
         order.setRegionId(createOrderObject.getRegionId());
         order.setSearchText(createOrderObject.getSearchText());
+
+        order.setSchedule(createOrderObject.getSchedule());
+        order.setEmployment(createOrderObject.getEmployment());
+        order.setVacancySearchFields(createOrderObject.getVacancySearchFields());
+        order.setIndustries(createOrderObject.getIndustries());
 
         var saveOrder = this.orderRepository.save(order);
 

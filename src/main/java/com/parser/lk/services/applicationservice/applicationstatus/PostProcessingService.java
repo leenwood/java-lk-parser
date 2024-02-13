@@ -49,10 +49,10 @@ public class PostProcessingService implements StatusInterface {
             return false;
         }
         Order order = orderOptional.get();
-        Integer count = this.vacancyRepository.countByGuidAndProcessed(order.getExternalId(), false);
+        Integer count = this.vacancyRepository.countByGuidAndProcessed(order.getGuid(), false);
         while (count > 0) {
             count--;
-            Vacancy vacancy = this.vacancyRepository.findOneByGuidAndProcessed(order.getExternalId(), false);
+            Vacancy vacancy = this.vacancyRepository.findFirstByGuidAndProcessed(order.getGuid(), false);
             com.parser.lk.services.vacanciesparser.dto.vacancies.Vacancy vacancyResponse;
             vacancyResponse = this.vacanciesParser.getVacancyById(vacancy.getExternalId());
             vacancy.setVacancyDescription(vacancyResponse.getDescription());
@@ -60,6 +60,7 @@ public class PostProcessingService implements StatusInterface {
 
             vacancy.setFunctionalDescription(this.aiService.extractDescription(vacancyResponse.getDescription()));
             vacancy.setGrade(this.aiService.extractGrade(vacancyResponse.getName()));
+            this.vacancyRepository.save(vacancy);
         }
 
 
