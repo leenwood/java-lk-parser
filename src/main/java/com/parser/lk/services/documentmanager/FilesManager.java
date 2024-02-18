@@ -20,6 +20,12 @@ public class FilesManager {
 
     private final Logger logger = LoggerFactory.getLogger(FilesManager.class);
 
+    private final XlsxDocumentService xlsxDocumentService;
+
+    public FilesManager(XlsxDocumentService xlsxDocumentService) {
+        this.xlsxDocumentService = xlsxDocumentService;
+    }
+
 
     public Map<String, Map<String, String>> getDocumentsList() {
         logger.info(String.format("classpath:/%s/*", this.filesPath));
@@ -38,6 +44,10 @@ public class FilesManager {
         map2.put("url", "source://files");
         map.put("file1", map2);
         return map;
+    }
+
+    public void createExcelDocument(Long id) {
+        this.xlsxDocumentService.createXlsxDocumentByOrderId(id);
     }
 
 }
