@@ -5,10 +5,9 @@ import com.parser.lk.repository.OrderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
@@ -21,7 +20,15 @@ public class FilesManager {
 
 
     @Value("${application.fileoutput.path}")
-    private String filesPath;
+    private String filesDirectoryPath;
+
+    @Value("${server.address}")
+    private String serverAddress;
+
+
+    @Value("${server.port}")
+    private String serverPort;
+
 
     private final OrderRepository orderRepository;
 
@@ -39,41 +46,59 @@ public class FilesManager {
         Map<String, Map<String, String>> result = new HashMap<>();
 
         try {
-            PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-            Resource[] resources = resolver.getResources(String.format("classpath:/%s/*", this.filesPath));
+            String folderPath = String.format("%s", this.filesDirectoryPath);
 
-            for (Resource resource : resources) {
-                if (resource.getFilename() == ".gitkeep") {
-                    continue;
+            File folder = new File(folderPath);
+
+            if (folder.exists() && folder.isDirectory()) {
+                File[] files = folder.listFiles();
+
+                if (files != null) {
+                    for (File file : files) {
+
+                        if (file.getName() == ".gitkeep") {
+                            continue;
+                        }
+
+                        String guid = this.extractGuid(file.getName());
+
+                        if (guid == null) {
+                            continue;
+                        }
+
+                        Order order = this.orderRepository.findFirstByGuid(guid);
+
+                        Map<String, String> object = this.convertToObject(file, order);
+
+                        result.put(String.valueOf(order.getId()), object);
+                    }
+                } else {
+                    this.logger.info("Folder is empty");
                 }
-
-                String guid = this.extractGuid(resource.getFilename());
-
-                if (guid == null) {
-                    continue;
-                }
-
-                Order order = this.orderRepository.findFirstByGuid(guid);
-
-                Map<String, String> object = this.convertToObject(resource, order);
-
-                result.put(String.valueOf(order.getId()), object);
+            } else {
+                throw new Exception("Path is not define or folder doesn't exist");
             }
-        } catch (IOException e) {
+        } catch (Throwable e) {
             logger.error(e.toString());
         }
 
         return result;
     }
 
-    private Map<String, String> convertToObject(Resource resource, Order order) throws IOException {
+    private Map<String, String> convertToObject(File resource, Order order) throws IOException {
         Map<String, String> object = new HashMap<>();
         object.put("id", String.valueOf(order.getId()));
         object.put("datetime", String.valueOf(new Date(order.getTimestamp())));
-        object.put("filename", resource.getFilename());
-        object.put("uri", String.valueOf(resource.getURI()));
-        object.put("url", String.valueOf(resource.getURL()));
-        object.put("description", resource.getDescription());
+        object.put("filename", resource.getName());
+        object.put("path",
+                String.format(
+                        "%s://%s:%s/api/v1/files/excel/%s",
+                        "http",
+                        this.serverAddress,
+                        this.serverPort,
+                        order.getGuid()
+                )
+        );
         return object;
     }
 
@@ -85,12 +110,20 @@ public class FilesManager {
         Pattern pattern = Pattern.compile("(guid-\\d+)\\.xlsx");
         Matcher matcher = pattern.matcher(name);
 
-        // Проверяем, совпадает ли строка с регулярным выражением
+
         if (matcher.matches()) {
-            return matcher.group(1); // Возвращаем значение, соответствующее первой группе в скобках
+            return matcher.group(1);
         } else {
-            return null; // Если не найдено совпадение
+            return null;
         }
     }
 
+    public File getFileByGuid(String guid) {
+        String filePath = String.format("%s/%s.xlsx", this.filesDirectoryPath, guid);
+        File file = new File(filePath);
+        if (file.exists()) {
+            return file;
+        }
+        return null;
+    }
 }
