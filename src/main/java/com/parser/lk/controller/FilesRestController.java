@@ -3,7 +3,6 @@ package com.parser.lk.controller;
 
 import com.parser.lk.dto.response.analytics.SuccessResponse;
 import com.parser.lk.services.documentmanager.FilesManager;
-import com.parser.lk.services.documentmanager.XlsxDocumentService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -12,12 +11,9 @@ import java.util.Map;
 @RequestMapping(("/api/v1/files"))
 public class FilesRestController {
 
-    private final XlsxDocumentService xlsxDocumentService;
-
     private final FilesManager filesManager;
 
-    public FilesRestController(XlsxDocumentService xlsxDocumentService, FilesManager filesManager) {
-        this.xlsxDocumentService = xlsxDocumentService;
+    public FilesRestController(FilesManager filesManager) {
         this.filesManager = filesManager;
     }
 
@@ -25,7 +21,7 @@ public class FilesRestController {
     public SuccessResponse createExcelFile(
             @RequestParam(value = "orderId") Long id
     ) {
-        this.xlsxDocumentService.createXlsxDocumentByOrderId(id);
+        this.filesManager.createExcelDocument(id);
         SuccessResponse successResponse = new SuccessResponse();
         successResponse.setStatus(true);
         return successResponse;
