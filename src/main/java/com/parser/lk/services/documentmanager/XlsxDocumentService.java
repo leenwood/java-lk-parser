@@ -90,25 +90,25 @@ public class XlsxDocumentService {
             Sheet sheet = workbook.getSheetAt(0);
             int lastRowNum = sheet.getLastRowNum();
 
-            Row row = sheet.createRow(1);
+            Row row = sheet.getRow(1);
 
             row.createCell(22).setCellValue("от");
 
             Cell cell0 = row.createCell(23);
-            cell0.setCellFormula(String.format("MEDIAN(N1:N%s)", lastRowNum));
+            cell0.setCellFormula(String.format("MEDIAN(N2:N%s)", lastRowNum+1));
 
             Cell cell1 = row.createCell(24);
-            cell1.setCellFormula(String.format("AVERAGE(N1:N%s)", lastRowNum));
+            cell1.setCellFormula(String.format("AVERAGE(N2:N%s)", lastRowNum+1));
 
-            row = sheet.createRow(2);
+            row = sheet.getRow(2);
 
             row.createCell(22).setCellValue("до");
 
             cell0 = row.createCell(23);
-            cell0.setCellFormula(String.format("MEDIAN(O1:O%s)", lastRowNum));
+            cell0.setCellFormula(String.format("MEDIAN(O2:O%s)", lastRowNum+1));
 
             cell1 = row.createCell(24);
-            cell1.setCellFormula(String.format("AVERAGE(O1:O%s)", lastRowNum));
+            cell1.setCellFormula(String.format("AVERAGE(O2:O%s)", lastRowNum+1));
 
 
             try (FileOutputStream fileOut = new FileOutputStream(filePath)) {
