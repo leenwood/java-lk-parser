@@ -34,6 +34,7 @@ public class ParserManager {
         order.setGuid(createOrderObject.getExternalId());
         order.setRegionId(createOrderObject.getRegionId());
         order.setSearchText(createOrderObject.getSearchText());
+        order.setExperience(createOrderObject.getExperience());
 
         order.setSchedule(createOrderObject.getSchedule());
         order.setEmployment(createOrderObject.getEmployment());

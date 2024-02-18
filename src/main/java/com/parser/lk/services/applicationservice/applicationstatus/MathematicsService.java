@@ -2,7 +2,10 @@ package com.parser.lk.services.applicationservice.applicationstatus;
 
 import com.parser.lk.services.applicationservice.NameStatusServiceEnum;
 import com.parser.lk.services.applicationservice.StatusInterface;
+import org.springframework.stereotype.Service;
 
+
+@Service("MathematicsService")
 public class MathematicsService implements StatusInterface {
     @Override
     public boolean doProcess(Long orderId) {

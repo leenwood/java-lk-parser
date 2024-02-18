@@ -37,3 +37,6 @@ build/
 docker/postgresql/data/
 docker/rabbitmq/data
 docker-compose.yml
+
+### files ###
+files/xlsx/
