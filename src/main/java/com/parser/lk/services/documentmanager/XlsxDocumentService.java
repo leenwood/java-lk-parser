@@ -10,15 +10,15 @@ import com.parser.lk.repository.OrderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.io.FileInputStream;
+import java.io.*;
 import java.util.Optional;
-import java.io.FileOutputStream;
-import java.io.IOException;
 
 @Service
 public class XlsxDocumentService {
@@ -28,15 +28,18 @@ public class XlsxDocumentService {
 
     private final OrderRepository orderRepository;
 
+    private final ResourceLoader resourceLoader;
+
 
     private final Logger logger = LoggerFactory.getLogger(XlsxDocumentService.class);
 
     @Value("${application.fileoutput.path}")
     private String outputPath;
 
-    public XlsxDocumentService(VacancyRepository vacancyRepository, OrderRepository orderRepository) {
+    public XlsxDocumentService(VacancyRepository vacancyRepository, OrderRepository orderRepository, ResourceLoader resourceLoader) {
         this.vacancyRepository = vacancyRepository;
         this.orderRepository = orderRepository;
+        this.resourceLoader = resourceLoader;
     }
 
     public void createXlsxDocumentByOrderId(Long orderId) {
@@ -55,12 +58,12 @@ public class XlsxDocumentService {
         }
 
         if (!this.createExcelFile(order.getGuid())) {
-            return ;
+            return;
         }
         int currentPage = 0;
         while (true) {
             Pageable pageable = PageRequest.of(currentPage, 100);
-            Page<Vacancy> vacanciesPage = vacancyRepository.findAllByGuidAndProcessed(order.getGuid(), true,pageable);
+            Page<Vacancy> vacanciesPage = vacancyRepository.findAllByGuidAndProcessed(order.getGuid(), true, pageable);
             if (vacanciesPage.isEmpty()) {
                 break;
             }
@@ -75,10 +78,10 @@ public class XlsxDocumentService {
     }
 
     private void calculateFormula(String guid) {
-        String filePath = String.format("%s/%s.xlsx", this.outputPath, guid);
-
-        try (FileInputStream fileInputStream = new FileInputStream(filePath);
-             Workbook workbook = new XSSFWorkbook(fileInputStream)) {
+        String filePath = String.format("src/main/resource/%s/%s.xlsx", this.outputPath, guid);
+        Resource resource = this.resourceLoader.getResource(filePath);
+        try (InputStream inputStream = resource.getInputStream();
+             Workbook workbook = new XSSFWorkbook(inputStream)) {
 
             Sheet sheet = workbook.getSheetAt(0);
             int lastRowNum = sheet.getLastRowNum();
@@ -104,8 +107,11 @@ public class XlsxDocumentService {
             cell1.setCellFormula(String.format("AVERAGE(O1:O%s)", lastRowNum));
 
 
-            try (FileOutputStream fileOutputStream = new FileOutputStream(filePath)) {
-                workbook.write(fileOutputStream);
+            resource = resourceLoader.getResource(filePath);
+            File file = resource.getFile();
+
+            try (OutputStream outputStream = new FileOutputStream(file)) {
+                workbook.write(outputStream);
                 this.logger.info("Calculate finish");
             } catch (IOException e) {
                 this.logger.error(e.toString());
@@ -118,10 +124,15 @@ public class XlsxDocumentService {
     }
 
     private void writeExcelFile(String guid, Vacancy vacancy) {
-        String filePath = String.format("%s/%s.xlsx", this.outputPath, guid);
+        String filePath = String.format(
+                "classpath:/%s/%s.xlsx",
+                this.outputPath,
+                guid
+        );
+        Resource resource = this.resourceLoader.getResource(filePath);
 
-        try (FileInputStream fileInputStream = new FileInputStream(filePath);
-             Workbook workbook = new XSSFWorkbook(fileInputStream)) {
+        try (InputStream inputStream = resource.getInputStream();
+             Workbook workbook = new XSSFWorkbook(inputStream)) {
 
             Sheet sheet = workbook.getSheetAt(0); // Получаем первый лист
             int lastRowNum = sheet.getLastRowNum(); // Получаем номер последней строки
@@ -148,19 +159,20 @@ public class XlsxDocumentService {
             row.createCell(17).setCellValue(vacancy.getOriginalUrl());
             row.createCell(18).setCellValue(vacancy.getExternalId());
 
+            resource = resourceLoader.getResource(filePath);
+            File file = resource.getFile();
 
-            try (FileOutputStream fileOutputStream = new FileOutputStream(filePath)) {
-                workbook.write(fileOutputStream);
+            try (OutputStream outputStream = new FileOutputStream(file)) {
+                workbook.write(outputStream);
                 this.logger.info(String.format("Vacancy save in xlsx file (vacancy id:%s)", vacancy.getId()));
             } catch (IOException e) {
-                this.logger.error(e.toString());
+                this.logger.error("Error while save vacancy \n " + e.toString());
             }
 
         } catch (IOException e) {
             this.logger.error(e.toString());
         }
     }
-
 
 
     private boolean createExcelFile(String guid) {
@@ -198,12 +210,18 @@ public class XlsxDocumentService {
                 sheet.autoSizeColumn(i);
             }
 
-
-            try (FileOutputStream fileOut = new FileOutputStream(String.format("%s/%s.xlsx", this.outputPath, guid))) {
+            try (FileOutputStream fileOut = new FileOutputStream(
+                    String.format(
+                            "src/main/resources/%s/%s.xlsx",
+                            this.outputPath,
+                            guid
+                    )
+            )
+            ) {
                 workbook.write(fileOut);
             }
         } catch (IOException e) {
-            this.logger.error(String.format("Error while creating XLSX file (guid:%s)", guid));
+            this.logger.error(String.format("Error while creating XLSX file (guid:%s) \n %s", guid, e));
             return false;
         }
         this.logger.info(String.format("File with name %s.xlsx created", guid));
