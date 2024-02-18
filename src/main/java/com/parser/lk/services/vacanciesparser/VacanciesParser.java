@@ -51,6 +51,7 @@ public class VacanciesParser {
         vacancy.setOriginUrl(vacancyResponse.getOriginUrl());
         vacancy.setName(vacancyResponse.getName());
         vacancy.setId(vacancyResponse.getId());
+        vacancy.setDescription(vacancyResponse.getDescription());
 
         Area area = new Area();
         area.setId(vacancyResponse.getArea().getId());

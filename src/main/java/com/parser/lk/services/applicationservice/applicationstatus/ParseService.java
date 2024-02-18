@@ -50,6 +50,7 @@ public class ParseService implements StatusInterface {
     public boolean doProcess(Long orderId) {
         Optional<Order> orderOptional = this.orderRepository.findById(orderId);
         if (orderOptional.isEmpty()) {
+            this.logger.error(String.format("order by id %s not found", orderId));
             return false;
         }
         Order order = orderOptional.get();

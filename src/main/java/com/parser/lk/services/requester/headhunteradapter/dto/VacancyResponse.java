@@ -22,4 +22,6 @@ public class VacancyResponse {
     private ExperienceResponse experience;
 
     private ScheduleResponse schedule;
+
+    private String Description;
 }

@@ -57,9 +57,17 @@ public class PostProcessingService implements StatusInterface {
             vacancyResponse = this.vacanciesParser.getVacancyById(vacancy.getExternalId());
             vacancy.setVacancyDescription(vacancyResponse.getDescription());
 
-
             vacancy.setFunctionalDescription(this.aiService.extractDescription(vacancyResponse.getDescription()));
             vacancy.setGrade(this.aiService.extractGrade(vacancyResponse.getName()));
+
+            if (vacancyResponse.getSalary() != null) {
+                vacancy.setSalaryFrom(vacancyResponse.getSalary().getSalaryFrom());
+                vacancy.setSalaryTo(vacancyResponse.getSalary().getSalaryTo());
+                vacancy.setSalaryGross(vacancyResponse.getSalary().isSalaryGross());
+                vacancy.setCurrency(vacancyResponse.getSalary().getCurrency());
+            }
+
+            vacancy.setProcessed(true);
             this.vacancyRepository.save(vacancy);
         }
 

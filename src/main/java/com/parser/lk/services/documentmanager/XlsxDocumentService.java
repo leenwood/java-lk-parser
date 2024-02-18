@@ -1,0 +1,231 @@
+package com.parser.lk.services.documentmanager;
+
+import com.parser.lk.entity.Vacancy;
+import com.parser.lk.repository.VacancyRepository;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import com.parser.lk.entity.Order;
+import com.parser.lk.repository.OrderRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import java.io.*;
+import java.util.Optional;
+
+@Service
+public class XlsxDocumentService {
+
+    private final VacancyRepository vacancyRepository;
+
+
+    private final OrderRepository orderRepository;
+
+    private final ResourceLoader resourceLoader;
+
+
+    private final Logger logger = LoggerFactory.getLogger(XlsxDocumentService.class);
+
+    @Value("${application.fileoutput.path}")
+    private String outputPath;
+
+    public XlsxDocumentService(VacancyRepository vacancyRepository, OrderRepository orderRepository, ResourceLoader resourceLoader) {
+        this.vacancyRepository = vacancyRepository;
+        this.orderRepository = orderRepository;
+        this.resourceLoader = resourceLoader;
+    }
+
+    public void createXlsxDocumentByOrderId(Long orderId) {
+        Optional<Order> orderOptional = this.orderRepository.findById(orderId);
+        if (orderOptional.isEmpty()) {
+            this.logger.error(String.format("order by id %s not found", orderId));
+            return;
+        }
+        Order order = orderOptional.get();
+
+        int count = this.vacancyRepository.countByGuidAndProcessed(order.getGuid(), true);
+
+        if (count < 1) {
+            this.logger.error(String.format("vacancies by order not found (orderId:%s|guid:%s)", order.getId(), order.getGuid()));
+            return;
+        }
+
+        if (!this.createExcelFile(order.getGuid())) {
+            return;
+        }
+        int currentPage = 0;
+        while (true) {
+            Pageable pageable = PageRequest.of(currentPage, 100);
+            Page<Vacancy> vacanciesPage = vacancyRepository.findAllByGuidAndProcessed(order.getGuid(), true, pageable);
+            if (vacanciesPage.isEmpty()) {
+                break;
+            }
+            currentPage++;
+            for (Vacancy vacancy : vacanciesPage.getContent()) {
+                this.writeExcelFile(order.getGuid(), vacancy);
+            }
+        }
+
+        this.calculateFormula(order.getGuid());
+
+    }
+
+    private void calculateFormula(String guid) {
+        String filePath = String.format("src/main/resource/%s/%s.xlsx", this.outputPath, guid);
+        Resource resource = this.resourceLoader.getResource(filePath);
+        try (InputStream inputStream = resource.getInputStream();
+             Workbook workbook = new XSSFWorkbook(inputStream)) {
+
+            Sheet sheet = workbook.getSheetAt(0);
+            int lastRowNum = sheet.getLastRowNum();
+
+            Row row = sheet.createRow(1);
+
+            row.createCell(22).setCellValue("от");
+
+            Cell cell0 = row.createCell(23);
+            cell0.setCellFormula(String.format("MEDIAN(N1:N%s)", lastRowNum));
+
+            Cell cell1 = row.createCell(24);
+            cell1.setCellFormula(String.format("AVERAGE(N1:N%s)", lastRowNum));
+
+            row = sheet.createRow(2);
+
+            row.createCell(22).setCellValue("до");
+
+            cell0 = row.createCell(23);
+            cell0.setCellFormula(String.format("MEDIAN(O1:O%s)", lastRowNum));
+
+            cell1 = row.createCell(24);
+            cell1.setCellFormula(String.format("AVERAGE(O1:O%s)", lastRowNum));
+
+
+            resource = resourceLoader.getResource(filePath);
+            File file = resource.getFile();
+
+            try (OutputStream outputStream = new FileOutputStream(file)) {
+                workbook.write(outputStream);
+                this.logger.info("Calculate finish");
+            } catch (IOException e) {
+                this.logger.error(e.toString());
+            }
+
+        } catch (IOException e) {
+            this.logger.error(e.toString());
+        }
+
+    }
+
+    private void writeExcelFile(String guid, Vacancy vacancy) {
+        String filePath = String.format(
+                "classpath:/%s/%s.xlsx",
+                this.outputPath,
+                guid
+        );
+        Resource resource = this.resourceLoader.getResource(filePath);
+
+        try (InputStream inputStream = resource.getInputStream();
+             Workbook workbook = new XSSFWorkbook(inputStream)) {
+
+            Sheet sheet = workbook.getSheetAt(0); // Получаем первый лист
+            int lastRowNum = sheet.getLastRowNum(); // Получаем номер последней строки
+
+            Row row = sheet.createRow(lastRowNum + 1); // Создаем новую строку
+
+            row.createCell(0).setCellValue(vacancy.getId());
+            row.createCell(1).setCellValue("в работе");
+            row.createCell(2).setCellValue(vacancy.getArea());
+            row.createCell(3).setCellValue("в работе");
+            row.createCell(4).setCellValue(vacancy.getExperience());
+            row.createCell(5).setCellValue(vacancy.getGrade());
+            row.createCell(6).setCellValue("в работе");
+            row.createCell(7).setCellValue(vacancy.getSchedule());
+            row.createCell(8).setCellValue("Тип занятости");
+            row.createCell(9).setCellValue(vacancy.getEmployment());
+            row.createCell(10).setCellValue(vacancy.getName());
+            row.createCell(11).setCellValue(vacancy.getVacancyDescription());
+            row.createCell(12).setCellValue(vacancy.getFunctionalDescription());
+            row.createCell(13).setCellValue(vacancy.getSalaryFrom());
+            row.createCell(14).setCellValue(vacancy.getSalaryTo());
+            row.createCell(15).setCellValue(vacancy.getSalaryGross());
+            row.createCell(16).setCellValue(vacancy.getCurrency());
+            row.createCell(17).setCellValue(vacancy.getOriginalUrl());
+            row.createCell(18).setCellValue(vacancy.getExternalId());
+
+            resource = resourceLoader.getResource(filePath);
+            File file = resource.getFile();
+
+            try (OutputStream outputStream = new FileOutputStream(file)) {
+                workbook.write(outputStream);
+                this.logger.info(String.format("Vacancy save in xlsx file (vacancy id:%s)", vacancy.getId()));
+            } catch (IOException e) {
+                this.logger.error("Error while save vacancy \n " + e.toString());
+            }
+
+        } catch (IOException e) {
+            this.logger.error(e.toString());
+        }
+    }
+
+
+    private boolean createExcelFile(String guid) {
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("Вакансии");
+
+            Row headerRow = sheet.createRow(0);
+            headerRow.createCell(0).setCellValue("ID");
+            headerRow.createCell(1).setCellValue("Регион");
+            headerRow.createCell(2).setCellValue("Регион (ID)");
+            headerRow.createCell(3).setCellValue("Опыт работы");
+            headerRow.createCell(4).setCellValue("Опыт работы (Alias)");
+            headerRow.createCell(5).setCellValue("Грейд");
+            headerRow.createCell(6).setCellValue("График работы");
+            headerRow.createCell(7).setCellValue("График работы (Alias)");
+            headerRow.createCell(8).setCellValue("Тип занятости");
+            headerRow.createCell(9).setCellValue("Тип занятости (Alias)");
+            headerRow.createCell(10).setCellValue("Название вакансии");
+            headerRow.createCell(11).setCellValue("Описание вакансии");
+            headerRow.createCell(12).setCellValue("Функциональное описание вакансии");
+            headerRow.createCell(13).setCellValue("Зарплата от");
+            headerRow.createCell(14).setCellValue("Зарплата до");
+            headerRow.createCell(15).setCellValue("До вычета налога (bool)");
+            headerRow.createCell(16).setCellValue("Курс");
+            headerRow.createCell(17).setCellValue("Ссылка на вакансию");
+            headerRow.createCell(18).setCellValue("ID HH вакансии");
+            headerRow.createCell(20).setCellValue("GUID:");
+            headerRow.createCell(21).setCellValue(guid);
+
+
+            headerRow.createCell(23).setCellValue("Медиана зарплата");
+            headerRow.createCell(24).setCellValue("Средняя зарплата");
+
+            for (int i = 0; i < headerRow.getLastCellNum(); i++) {
+                sheet.autoSizeColumn(i);
+            }
+
+            try (FileOutputStream fileOut = new FileOutputStream(
+                    String.format(
+                            "src/main/resources/%s/%s.xlsx",
+                            this.outputPath,
+                            guid
+                    )
+            )
+            ) {
+                workbook.write(fileOut);
+            }
+        } catch (IOException e) {
+            this.logger.error(String.format("Error while creating XLSX file (guid:%s) \n %s", guid, e));
+            return false;
+        }
+        this.logger.info(String.format("File with name %s.xlsx created", guid));
+        return true;
+    }
+
+}

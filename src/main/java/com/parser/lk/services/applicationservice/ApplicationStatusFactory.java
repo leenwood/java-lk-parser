@@ -23,6 +23,8 @@ public class ApplicationStatusFactory {
                 return this.context.getBean("PostProcessingStatusService", StatusInterface.class);
             case "PARSING_ERROR":
                 return this.context.getBean("ParsingErrorStatusService", StatusInterface.class);
+            case "MATHEMATICS":
+                return this.context.getBean("MathematicsService", StatusInterface.class);
             default:
                 logger.error(String.format("Invalid status order: %s. (Not found)", nextStatusOrder));
                 return null;

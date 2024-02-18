@@ -3,6 +3,7 @@ package com.parser.lk.controller;
 
 import com.parser.lk.services.applicationservice.ChangeStatusService;
 import com.parser.lk.services.applicationservice.applicationstatus.PostProcessingService;
+import com.parser.lk.services.documentmanager.XlsxDocumentService;
 import com.parser.lk.services.vacanciesparser.VacanciesParser;
 import com.parser.lk.services.vacanciesparser.dto.HeadHunterFiltersParam;
 import com.parser.lk.services.vacanciesparser.dto.vacancies.Vacancies;
@@ -24,10 +25,13 @@ public class TestController {
 
     private final VacanciesParser vacanciesParser;
 
-    public TestController(ChangeStatusService changeStatusService, PostProcessingService postProcessingService, VacanciesParser vacanciesParser) {
+    private final XlsxDocumentService xlsxDocumentService;
+
+    public TestController(ChangeStatusService changeStatusService, PostProcessingService postProcessingService, VacanciesParser vacanciesParser, XlsxDocumentService xlsxDocumentService) {
         this.changeStatusService = changeStatusService;
         this.postProcessingService = postProcessingService;
         this.vacanciesParser = vacanciesParser;
+        this.xlsxDocumentService = xlsxDocumentService;
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/vacancies", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -64,8 +68,16 @@ public class TestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/test1", produces = MediaType.APPLICATION_JSON_VALUE)
-    public void test1() {
-        this.postProcessingService.doProcess(2902L);
+    public void test1(
+            @RequestParam Long id
+    ) {
+        this.xlsxDocumentService.createXlsxDocumentByOrderId(id);
+        return;
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/test2", produces = MediaType.APPLICATION_JSON_VALUE)
+    public void test2() {
+        this.postProcessingService.doProcess(1L);
         return;
     }
 }

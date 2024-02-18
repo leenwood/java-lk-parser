@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigInteger;
+import java.sql.Clob;
 
 @Entity
 @Setter
@@ -18,12 +19,15 @@ public class Vacancy {
 
     private String originalUrl;
 
+    @Column(length = 2500)
     private String name;
 
     private String grade;
 
+    @Column(length = 65536)
     private String functionalDescription;
 
+    @Column(length = 65536)
     private String vacancyDescription;
 
     private String experience;
@@ -41,5 +45,13 @@ public class Vacancy {
     private String guid;
 
     private boolean processed = false;
+
+    private Integer salaryFrom;
+
+    private Integer salaryTo;
+
+    private Boolean salaryGross;
+
+    private String currency;
 
 }

@@ -1,4 +1,4 @@
-package com.parser.lk.domain;
+package com.parser.lk.controller;
 
 
 import com.parser.lk.dto.request.analytics.CreateOrderRequest;
