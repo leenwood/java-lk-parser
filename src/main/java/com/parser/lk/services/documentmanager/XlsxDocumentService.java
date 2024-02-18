@@ -78,10 +78,14 @@ public class XlsxDocumentService {
     }
 
     private void calculateFormula(String guid) {
-        String filePath = String.format("src/main/resource/%s/%s.xlsx", this.outputPath, guid);
-        Resource resource = this.resourceLoader.getResource(filePath);
-        try (InputStream inputStream = resource.getInputStream();
-             Workbook workbook = new XSSFWorkbook(inputStream)) {
+        String filePath = String.format(
+                "%s/%s.xlsx",
+                this.outputPath,
+                guid
+        );
+
+        try (FileInputStream fileIn = new FileInputStream(filePath);
+             Workbook workbook = new XSSFWorkbook(fileIn)) {
 
             Sheet sheet = workbook.getSheetAt(0);
             int lastRowNum = sheet.getLastRowNum();
@@ -107,11 +111,8 @@ public class XlsxDocumentService {
             cell1.setCellFormula(String.format("AVERAGE(O1:O%s)", lastRowNum));
 
 
-            resource = resourceLoader.getResource(filePath);
-            File file = resource.getFile();
-
-            try (OutputStream outputStream = new FileOutputStream(file)) {
-                workbook.write(outputStream);
+            try (FileOutputStream fileOut = new FileOutputStream(filePath)) {
+                workbook.write(fileOut);
                 this.logger.info("Calculate finish");
             } catch (IOException e) {
                 this.logger.error(e.toString());
@@ -125,14 +126,13 @@ public class XlsxDocumentService {
 
     private void writeExcelFile(String guid, Vacancy vacancy) {
         String filePath = String.format(
-                "classpath:/%s/%s.xlsx",
+                "%s/%s.xlsx",
                 this.outputPath,
                 guid
         );
-        Resource resource = this.resourceLoader.getResource(filePath);
 
-        try (InputStream inputStream = resource.getInputStream();
-             Workbook workbook = new XSSFWorkbook(inputStream)) {
+        try (FileInputStream fileIn = new FileInputStream(filePath);
+             Workbook workbook = new XSSFWorkbook(fileIn)) {
 
             Sheet sheet = workbook.getSheetAt(0); // Получаем первый лист
             int lastRowNum = sheet.getLastRowNum(); // Получаем номер последней строки
@@ -159,11 +159,8 @@ public class XlsxDocumentService {
             row.createCell(17).setCellValue(vacancy.getOriginalUrl());
             row.createCell(18).setCellValue(vacancy.getExternalId());
 
-            resource = resourceLoader.getResource(filePath);
-            File file = resource.getFile();
-
-            try (OutputStream outputStream = new FileOutputStream(file)) {
-                workbook.write(outputStream);
+            try (FileOutputStream fileOut = new FileOutputStream(filePath)) {
+                workbook.write(fileOut);
                 this.logger.info(String.format("Vacancy save in xlsx file (vacancy id:%s)", vacancy.getId()));
             } catch (IOException e) {
                 this.logger.error("Error while save vacancy \n " + e.toString());
@@ -176,6 +173,13 @@ public class XlsxDocumentService {
 
 
     private boolean createExcelFile(String guid) {
+
+        String filePath = String.format(
+                "%s/%s.xlsx",
+                this.outputPath,
+                guid
+        );
+
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Вакансии");
 
@@ -210,14 +214,7 @@ public class XlsxDocumentService {
                 sheet.autoSizeColumn(i);
             }
 
-            try (FileOutputStream fileOut = new FileOutputStream(
-                    String.format(
-                            "src/main/resources/%s/%s.xlsx",
-                            this.outputPath,
-                            guid
-                    )
-            )
-            ) {
+            try (FileOutputStream fileOut = new FileOutputStream(filePath)) {
                 workbook.write(fileOut);
             }
         } catch (IOException e) {
