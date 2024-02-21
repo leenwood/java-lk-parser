@@ -36,8 +36,7 @@ public class FilesRestController {
 
     @GetMapping("/excel")
     public Map<String, Map<String, String>> getExcelDocumentsList() {
-        var list = this.filesManager.getDocumentsList();
-        return list;
+        return this.filesManager.getDocumentsList();
     }
 
 

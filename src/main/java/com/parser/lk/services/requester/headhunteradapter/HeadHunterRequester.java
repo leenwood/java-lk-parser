@@ -89,7 +89,7 @@ public class HeadHunterRequester {
 
         if (filtersParam.getPeriod() != null) uri.queryParam("period", filtersParam.getPeriod());
 
-        if (filtersParam.getArea() != null) uri.queryParam("area", filtersParam.getArea());
+        if (!filtersParam.getArea().isEmpty()) uri.queryParam("area", filtersParam.getArea());
 
         if (filtersParam.getExperience() != null) uri.queryParam("experience", filtersParam.getExperience());
 
@@ -97,9 +97,9 @@ public class HeadHunterRequester {
 
         if (filtersParam.getSchedule() != null) uri.queryParam("schedule", filtersParam.getSchedule());
 
-        if (filtersParam.getIndustries() != null) uri.queryParam("industry", filtersParam.getIndustries());
+        if (!filtersParam.getIndustries().isEmpty()) uri.queryParam("industry", filtersParam.getIndustries());
 
-        if (filtersParam.getVacancySearchFields() != null) {
+        if (!filtersParam.getVacancySearchFields().isEmpty()) {
             uri.queryParam("search_field", filtersParam.getVacancySearchFields());
         }
 
