@@ -47,6 +47,7 @@ public class Order {
     private List<String> vacancySearchFields;
 
     /** Ид приходяший от димы, именуется как GUID */
+    @Column(unique = true)
     private String guid;
 
 }
