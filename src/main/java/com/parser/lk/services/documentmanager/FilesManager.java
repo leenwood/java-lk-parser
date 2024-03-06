@@ -1,6 +1,11 @@
 package com.parser.lk.services.documentmanager;
 
+import com.parser.lk.dto.FileStatusEnum;
+import com.parser.lk.dto.response.analytics.DocumentExcelListResponse;
+import com.parser.lk.dto.response.analytics.DocumentExcelResponse;
 import com.parser.lk.entity.Order;
+import com.parser.lk.entity.OrderExcelFileParam;
+import com.parser.lk.repository.OrderExcelFileParamRepository;
 import com.parser.lk.repository.OrderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,12 +41,35 @@ public class FilesManager {
 
     private final XlsxDocumentService xlsxDocumentService;
 
-    public FilesManager(OrderRepository orderRepository, XlsxDocumentService xlsxDocumentService) {
+    private final OrderExcelFileParamRepository orderExcelFileParamRepository;
+
+    public FilesManager(OrderRepository orderRepository, XlsxDocumentService xlsxDocumentService, OrderExcelFileParamRepository orderExcelFileParamRepository) {
         this.orderRepository = orderRepository;
         this.xlsxDocumentService = xlsxDocumentService;
+        this.orderExcelFileParamRepository = orderExcelFileParamRepository;
     }
 
+    public DocumentExcelListResponse getDocumentListV2() {
+        DocumentExcelListResponse list = new DocumentExcelListResponse();
+        for (OrderExcelFileParam file : this.orderExcelFileParamRepository.findByStatus(FileStatusEnum.READY)) {
+            DocumentExcelResponse document = new DocumentExcelResponse();
+            document.setId(file.getId());
+            document.setPath(
+                    String.format(
+                            "%s://%s:%s/api/v1/files/excel/%s",
+                            "http",
+                            this.serverAddress,
+                            this.serverPort,
+                            file.getGuid()
+                    ));
+            document.setFilename(file.getFilename());
+            list.getData().add(document);
+        }
+        list.setCount(this.orderExcelFileParamRepository.countByStatus(FileStatusEnum.READY));
+        return list;
+    }
 
+    @Deprecated
     public Map<String, Map<String, String>> getDocumentsList() {
         Map<String, Map<String, String>> result = new HashMap<>();
 
@@ -102,8 +130,8 @@ public class FilesManager {
         return object;
     }
 
-    public void createExcelDocument(Long id) {
-        this.xlsxDocumentService.createXlsxDocumentByOrderId(id);
+    public void createExcelDocument(String guid) {
+        this.xlsxDocumentService.createXlsxDocumentByOrderId(guid);
     }
 
     private String extractGuid(String name) {

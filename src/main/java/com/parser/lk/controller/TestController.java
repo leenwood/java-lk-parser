@@ -67,14 +67,6 @@ public class TestController {
         return;
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/test1", produces = MediaType.APPLICATION_JSON_VALUE)
-    public void test1(
-            @RequestParam Long id
-    ) {
-        this.xlsxDocumentService.createXlsxDocumentByOrderId(id);
-        return;
-    }
-
     @RequestMapping(method = RequestMethod.GET, value = "/test2", produces = MediaType.APPLICATION_JSON_VALUE)
     public void test2() {
         this.postProcessingService.doProcess(1L);

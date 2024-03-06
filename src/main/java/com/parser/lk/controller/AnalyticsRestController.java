@@ -2,7 +2,10 @@ package com.parser.lk.controller;
 
 
 import com.parser.lk.dto.request.analytics.CreateOrderRequest;
+import com.parser.lk.dto.request.analytics.OrderGuids;
+import com.parser.lk.dto.response.analytics.GetOrdersByGuidResponse;
 import com.parser.lk.dto.response.analytics.SuccessResponse;
+import com.parser.lk.services.parsingmanager.OrderManager;
 import com.parser.lk.services.parsingmanager.ParserManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -17,9 +20,12 @@ public class AnalyticsRestController {
 
     private final ParserManager parserManager;
 
+    private final OrderManager orderManager;
+
     @Autowired
-    public AnalyticsRestController(ParserManager parserManager) {
+    public AnalyticsRestController(ParserManager parserManager, OrderManager orderManager) {
         this.parserManager = parserManager;
+        this.orderManager = orderManager;
     }
 
 
@@ -37,6 +43,11 @@ public class AnalyticsRestController {
         SuccessResponse response = new SuccessResponse();
         response.setStatus(result);
         return CompletableFuture.completedFuture(response);
+    }
+
+    @PostMapping("/orders")
+    public GetOrdersByGuidResponse getOrdersByGuid(@RequestBody OrderGuids orderGuids) {
+        return this.orderManager.getOrdersByGuid(orderGuids);
     }
 
 }

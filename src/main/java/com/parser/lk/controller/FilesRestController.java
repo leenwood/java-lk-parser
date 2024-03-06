@@ -1,6 +1,7 @@
 package com.parser.lk.controller;
 
 
+import com.parser.lk.dto.response.analytics.DocumentExcelListResponse;
 import com.parser.lk.dto.response.analytics.SuccessResponse;
 import com.parser.lk.services.documentmanager.FilesManager;
 import org.springframework.core.io.FileSystemResource;
@@ -23,11 +24,11 @@ public class FilesRestController {
         this.filesManager = filesManager;
     }
 
-    @PatchMapping("/excel")
+    @PostMapping("/excel")
     public SuccessResponse createExcelFile(
-            @RequestParam(value = "orderId") Long id
+            @RequestParam(value = "guid") String guid
     ) {
-        this.filesManager.createExcelDocument(id);
+        this.filesManager.createExcelDocument(guid);
         SuccessResponse successResponse = new SuccessResponse();
         successResponse.setStatus(true);
         return successResponse;
@@ -35,8 +36,8 @@ public class FilesRestController {
 
 
     @GetMapping("/excel")
-    public Map<String, Map<String, String>> getExcelDocumentsList() {
-        return this.filesManager.getDocumentsList();
+    public DocumentExcelListResponse getExcelDocumentsList() {
+        return this.filesManager.getDocumentListV2();
     }
 
 
