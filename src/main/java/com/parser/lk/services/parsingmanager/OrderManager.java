@@ -19,6 +19,19 @@ public class OrderManager {
     @Value("${application.fileoutput.path}")
     private String excelFolderPath;
 
+    @Value("${application.fileoutput.path}")
+    private String filesDirectoryPath;
+
+    @Value("${server.address}")
+    private String serverAddress;
+
+    @Value("${application.http.type}")
+    private String httpType;
+
+
+    @Value("${server.port}")
+    private String serverPort;
+
 
     private final OrderRepository orderRepository;
 
@@ -47,16 +60,10 @@ public class OrderManager {
             orderResponse.setStatus(order.getStatus());
 
             Optional<OrderExcelFileParam> optionalOrderExcelFileParam = this.orderExcelFileParamRepository.findOneByGuid(guid);
-            if (!optionalOrderExcelFileParam.isEmpty()) {
+            if (optionalOrderExcelFileParam.isPresent()) {
                 OrderExcelFileParam orderExcelFileParam = optionalOrderExcelFileParam.get();
                 orderResponse.setFilename(orderExcelFileParam.getFilename());
-                orderResponse.setFilePath(
-                        String.format(
-                                "%s/%s",
-                                this.excelFolderPath,
-                                orderExcelFileParam.getFilename()
-                                )
-                );
+                orderResponse.setFilePath(this.createDownloadUrl(orderExcelFileParam.getGuid()));
             }
 
 
@@ -64,6 +71,16 @@ public class OrderManager {
         }
 
         return orders;
+    }
+
+    public String createDownloadUrl(String guid) {
+        return String.format(
+                "%s://%s:%s/api/v1/files/excel/%s",
+                this.httpType,
+                this.serverAddress,
+                this.serverPort,
+                guid
+        );
     }
 
 }
