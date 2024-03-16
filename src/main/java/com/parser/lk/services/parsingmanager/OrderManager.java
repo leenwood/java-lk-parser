@@ -11,6 +11,7 @@ import com.parser.lk.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -41,6 +42,21 @@ public class OrderManager {
         this.orderRepository = orderRepository;
         this.orderExcelFileParamRepository = orderExcelFileParamRepository;
     }
+    
+    public GetOrdersByGuidResponse getOrders() {
+        GetOrdersByGuidResponse orders = new GetOrdersByGuidResponse();
+        for (Order order : this.orderRepository.findAll()) {
+
+            OrderResponse orderResponse = this.getOrderResponse(order);
+
+
+            orders.getData().add(orderResponse);
+        }
+
+        return orders;
+    }
+
+
 
 
     public GetOrdersByGuidResponse getOrdersByGuid(OrderGuids guids) {
@@ -54,17 +70,7 @@ public class OrderManager {
 
 
             Order order = orderOptional.get();
-            OrderResponse orderResponse = new OrderResponse();
-            orderResponse.setId(order.getId());
-            orderResponse.setGuid(order.getGuid());
-            orderResponse.setStatus(order.getStatus());
-
-            Optional<OrderExcelFileParam> optionalOrderExcelFileParam = this.orderExcelFileParamRepository.findOneByGuid(guid);
-            if (optionalOrderExcelFileParam.isPresent()) {
-                OrderExcelFileParam orderExcelFileParam = optionalOrderExcelFileParam.get();
-                orderResponse.setFilename(orderExcelFileParam.getFilename());
-                orderResponse.setFilePath(this.createDownloadUrl(orderExcelFileParam.getGuid()));
-            }
+            OrderResponse orderResponse = this.getOrderResponse(order);
 
 
             orders.getData().add(orderResponse);
@@ -72,6 +78,23 @@ public class OrderManager {
 
         return orders;
     }
+
+
+    private OrderResponse getOrderResponse(Order order) {
+        OrderResponse orderResponse = new OrderResponse();
+        orderResponse.setId(order.getId());
+        orderResponse.setGuid(order.getGuid());
+        orderResponse.setStatus(order.getStatus());
+
+        Optional<OrderExcelFileParam> optionalOrderExcelFileParam = this.orderExcelFileParamRepository.findOneByGuid(order.getGuid());
+        if (optionalOrderExcelFileParam.isPresent()) {
+            OrderExcelFileParam orderExcelFileParam = optionalOrderExcelFileParam.get();
+            orderResponse.setFilename(orderExcelFileParam.getFilename());
+            orderResponse.setFilePath(this.createDownloadUrl(orderExcelFileParam.getGuid()));
+        }
+        return orderResponse;
+    }
+
 
     public String createDownloadUrl(String guid) {
         return String.format(

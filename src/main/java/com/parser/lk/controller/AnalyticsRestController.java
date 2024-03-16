@@ -45,6 +45,11 @@ public class AnalyticsRestController {
         return CompletableFuture.completedFuture(response);
     }
 
+    @GetMapping("/orders")
+    public GetOrdersByGuidResponse getOrders() {
+        return this.orderManager.getOrders();
+    }
+
     @PostMapping("/orders")
     public GetOrdersByGuidResponse getOrdersByGuid(@RequestBody OrderGuids orderGuids) {
         return this.orderManager.getOrdersByGuid(orderGuids);
