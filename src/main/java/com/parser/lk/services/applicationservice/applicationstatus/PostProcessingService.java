@@ -7,7 +7,10 @@ import com.parser.lk.repository.VacancyRepository;
 import com.parser.lk.services.aiservice.AiService;
 import com.parser.lk.services.applicationservice.NameStatusServiceEnum;
 import com.parser.lk.services.applicationservice.StatusInterface;
+import com.parser.lk.services.requester.centralbank.CentralBankRequester;
 import com.parser.lk.services.vacanciesparser.VacanciesParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,18 +28,24 @@ public class PostProcessingService implements StatusInterface {
 
     private final AiService aiService;
 
+    private final CentralBankRequester centralBankRequester;
+
+    private final Logger logger = LoggerFactory.getLogger(PostProcessingService.class);
+
 
     @Autowired
     public PostProcessingService(
             VacancyRepository vacancyRepository,
             OrderRepository orderRepository,
             VacanciesParser vacanciesParser,
-            AiService aiService
+            AiService aiService,
+            CentralBankRequester centralBankRequester
     ) {
         this.vacancyRepository = vacancyRepository;
         this.orderRepository = orderRepository;
         this.vacanciesParser = vacanciesParser;
         this.aiService = aiService;
+        this.centralBankRequester = centralBankRequester;
     }
 
 
@@ -61,10 +70,18 @@ public class PostProcessingService implements StatusInterface {
             vacancy.setGrade(this.aiService.extractGrade(vacancyResponse.getName()));
 
             if (vacancyResponse.getSalary() != null) {
-                vacancy.setSalaryFrom(vacancyResponse.getSalary().getSalaryFrom());
-                vacancy.setSalaryTo(vacancyResponse.getSalary().getSalaryTo());
-                vacancy.setSalaryGross(vacancyResponse.getSalary().isSalaryGross());
-                vacancy.setCurrency(vacancyResponse.getSalary().getCurrency());
+                try {
+                    this.convertSalary(
+                            vacancyResponse.getSalary().getCurrency(),
+                            vacancy,
+                            vacancyResponse
+                    );
+                } catch (Exception exception) {
+                    this.logger.error(exception.toString());
+                    this.vacancyRepository.delete(vacancy);
+                    continue;
+                }
+
             }
 
             vacancy.setProcessed(true);
@@ -73,6 +90,29 @@ public class PostProcessingService implements StatusInterface {
 
 
         return true;
+    }
+
+    private void convertSalary(
+            String aliasCurrency,
+            Vacancy vacancy,
+            com.parser.lk.services.vacanciesparser.dto.vacancies.Vacancy vacancyResponse
+    ) throws Exception {
+        if (aliasCurrency.equals("RUR")) {
+            vacancy.setSalaryFrom(vacancyResponse.getSalary().getSalaryFrom());
+            vacancy.setSalaryTo(vacancyResponse.getSalary().getSalaryTo());
+            vacancy.setSalaryGross(vacancyResponse.getSalary().isSalaryGross());
+            vacancy.setCurrency(vacancyResponse.getSalary().getCurrency());
+        } else {
+            double valute = this.centralBankRequester.getCurrencyByAlias(aliasCurrency);
+
+            int salaryFrom = (int) (vacancyResponse.getSalary().getSalaryFrom() * valute);
+            int salaryTo = (int) (vacancyResponse.getSalary().getSalaryTo() * valute);
+
+            vacancy.setSalaryFrom(salaryFrom);
+            vacancy.setSalaryTo(salaryTo);
+            vacancy.setSalaryGross(vacancyResponse.getSalary().isSalaryGross());
+            vacancy.setCurrency(vacancyResponse.getSalary().getCurrency());
+        }
     }
 
     @Override

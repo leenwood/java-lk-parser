@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 @Service
 public class ApplicationStatusFactory {
 
@@ -14,21 +16,14 @@ public class ApplicationStatusFactory {
 
     private final Logger logger = LoggerFactory.getLogger(ApplicationStatusFactory.class);
 
-    public StatusInterface getStatusService(String nextStatusOrder, String currentStatusOrder) {
-
-        switch (nextStatusOrder) {
-            case "PARSING":
-                return this.context.getBean("ParseStatusService", StatusInterface.class);
-            case "POST_PROCESSING":
-                return this.context.getBean("PostProcessingStatusService", StatusInterface.class);
-            case "PARSING_ERROR":
-                return this.context.getBean("ParsingErrorStatusService", StatusInterface.class);
-            case "MATHEMATICS":
-                return this.context.getBean("MathematicsService", StatusInterface.class);
-            default:
-                logger.error(String.format("Invalid status order: %s. (Not found)", nextStatusOrder));
-                return null;
+    public StatusInterface getStatusService(String serviceAlias) {
+        Map<String, StatusInterface> services = context.getBeansOfType(StatusInterface.class);
+        for (StatusInterface service : services.values()) {
+            if (serviceAlias.equals(service.getStatusName())) {
+                return service;
+            }
         }
+        throw new IllegalArgumentException(String.format("Not found service with alias %s", serviceAlias));
     }
 
 }

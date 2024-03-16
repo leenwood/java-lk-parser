@@ -3,7 +3,9 @@ package com.parser.lk.controller;
 
 import com.parser.lk.services.applicationservice.ChangeStatusService;
 import com.parser.lk.services.applicationservice.applicationstatus.PostProcessingService;
+import com.parser.lk.services.calculationservice.CalculationWorkflow;
 import com.parser.lk.services.documentmanager.XlsxDocumentService;
+import com.parser.lk.services.requester.centralbank.CentralBankRequester;
 import com.parser.lk.services.vacanciesparser.VacanciesParser;
 import com.parser.lk.services.vacanciesparser.dto.HeadHunterFiltersParam;
 import com.parser.lk.services.vacanciesparser.dto.vacancies.Vacancies;
@@ -27,11 +29,24 @@ public class TestController {
 
     private final XlsxDocumentService xlsxDocumentService;
 
-    public TestController(ChangeStatusService changeStatusService, PostProcessingService postProcessingService, VacanciesParser vacanciesParser, XlsxDocumentService xlsxDocumentService) {
+    private final CentralBankRequester centralBankRequester;
+
+    private final CalculationWorkflow calculationWorkflow;
+
+    public TestController(
+            ChangeStatusService changeStatusService,
+            PostProcessingService postProcessingService,
+            VacanciesParser vacanciesParser,
+            XlsxDocumentService xlsxDocumentService,
+            CentralBankRequester centralBankRequester,
+            CalculationWorkflow calculationWorkflow
+    ) {
         this.changeStatusService = changeStatusService;
         this.postProcessingService = postProcessingService;
         this.vacanciesParser = vacanciesParser;
         this.xlsxDocumentService = xlsxDocumentService;
+        this.centralBankRequester = centralBankRequester;
+        this.calculationWorkflow = calculationWorkflow;
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/vacancies", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -71,5 +86,16 @@ public class TestController {
     public void test2() {
         this.postProcessingService.doProcess(1L);
         return;
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/getCurrency", produces = MediaType.APPLICATION_JSON_VALUE)
+    public double currency() throws Exception {
+        return this.centralBankRequester.getCurrencyByAlias("USD");
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/test3", produces = MediaType.APPLICATION_JSON_VALUE)
+    public String test3(@RequestParam(name = "orderId") Long orderId) throws Exception {
+        this.calculationWorkflow.baseWorkflow(orderId);
+        return "21";
     }
 }

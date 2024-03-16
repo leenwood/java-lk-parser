@@ -8,6 +8,7 @@ import com.parser.lk.repository.OrderRepository;
 import com.parser.lk.repository.VacancyRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.Optional;
 
 @Service
@@ -46,14 +47,39 @@ public class AverageService implements MathematicsMethodInterface {
             result.setFormulaId(this.getId());
             result.setOrderId(orderId);
             result.setFormulaAlias(this.getAlias());
+            result.setCreateDate(new Date());
+            this.calculationResultsRepository.save(result);
+            return;
         }
         Order order = orderOptional.get();
-
-        String guid = order.getGuid();
+        int count = 0;
+        long value = 0;
 
         for (Vacancy vacancy : this.vacancyRepository.findAll()) {
+            count++;
 
+            if (vacancy.getSalaryTo() > 0) {
+                value += vacancy.getSalaryTo();
+            } else if (vacancy.getSalaryFrom() > 0) {
+                value += vacancy.getSalaryFrom();
+            } else {
+                continue;
+            }
         }
+
+        double answer = (double) value / (double) count;
+
+
+        CalculationResults result = new CalculationResults();
+        result.setResult(Double.toString(answer));
+        result.setGuid(order.getGuid());
+        result.setFormulaId(this.getId());
+        result.setOrderId(orderId);
+        result.setFormulaAlias(this.getAlias());
+        result.setCreateDate(new Date());
+
+        this.calculationResultsRepository.save(result);
+        return;
     }
 
 }

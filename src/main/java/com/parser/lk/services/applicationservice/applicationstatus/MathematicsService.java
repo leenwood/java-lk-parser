@@ -4,6 +4,7 @@ import com.parser.lk.entity.Order;
 import com.parser.lk.repository.OrderRepository;
 import com.parser.lk.services.applicationservice.NameStatusServiceEnum;
 import com.parser.lk.services.applicationservice.StatusInterface;
+import com.parser.lk.services.calculationservice.CalculationWorkflow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -18,8 +19,14 @@ public class MathematicsService implements StatusInterface {
 
     private final Logger logger = LoggerFactory.getLogger(MathematicsService.class);
 
-    public MathematicsService(OrderRepository orderRepository) {
+    private final CalculationWorkflow calculationWorkflow;
+
+    public MathematicsService(
+            OrderRepository orderRepository,
+            CalculationWorkflow calculationWorkflow
+    ) {
         this.orderRepository = orderRepository;
+        this.calculationWorkflow = calculationWorkflow;
     }
 
 
@@ -35,9 +42,9 @@ public class MathematicsService implements StatusInterface {
 
         Order order = optionalOrder.get();
 
-        
+        this.calculationWorkflow.baseWorkflow(order.getId());
 
-        return false;
+        return true;
     }
 
     @Override
