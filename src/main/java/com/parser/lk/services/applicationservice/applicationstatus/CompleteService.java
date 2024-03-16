@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 public class CompleteService implements StatusInterface {
     @Override
     public boolean doProcess(Long orderId) {
-        return false;
+        return true;
     }
 
     @Override
