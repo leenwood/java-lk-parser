@@ -12,7 +12,7 @@ import java.util.Date;
 import java.util.Optional;
 
 @Service
-public class AverageService implements MathematicsMethodInterface {
+public class MedianService implements MathematicsMethodInterface {
 
     private final OrderRepository orderRepository;
 
@@ -20,11 +20,7 @@ public class AverageService implements MathematicsMethodInterface {
 
     private final VacancyRepository vacancyRepository;
 
-    public AverageService(
-            OrderRepository orderRepository,
-            CalculationResultsRepository calculationResultsRepository,
-            VacancyRepository vacancyRepository
-    ) {
+    public MedianService(OrderRepository orderRepository, CalculationResultsRepository calculationResultsRepository, VacancyRepository vacancyRepository) {
         this.orderRepository = orderRepository;
         this.calculationResultsRepository = calculationResultsRepository;
         this.vacancyRepository = vacancyRepository;
@@ -32,7 +28,7 @@ public class AverageService implements MathematicsMethodInterface {
 
     @Override
     public String getAlias() {
-        return "AVERAGE";
+        return "MEDIAN";
     }
 
     @Override
@@ -84,5 +80,4 @@ public class AverageService implements MathematicsMethodInterface {
         this.calculationResultsRepository.save(result);
         return;
     }
-
 }

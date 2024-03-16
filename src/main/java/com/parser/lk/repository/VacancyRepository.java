@@ -16,7 +16,6 @@ public interface VacancyRepository extends CrudRepository<Vacancy, Long> {
 
     public Page<Vacancy> findAllByGuidAndProcessed(String guid, boolean processed, Pageable pageable);
 
-    @Query("SELECT AVG(v.salaryTo) FROM Vacancy v WHERE v.guid = ?1")
-    public Double averageSalaryByGuid(String guid);
+    public Iterable<Vacancy> findAllByGuid(String guid);
 
 }

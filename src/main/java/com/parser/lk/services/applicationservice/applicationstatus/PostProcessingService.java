@@ -51,8 +51,6 @@ public class PostProcessingService implements StatusInterface {
 
     @Override
     public boolean doProcess(Long orderId) {
-        System.out.println("PostProcessing");
-
         Optional<Order> orderOptional = this.orderRepository.findById(orderId);
         if (orderOptional.isEmpty()) {
             return false;

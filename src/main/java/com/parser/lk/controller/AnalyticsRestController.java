@@ -4,13 +4,16 @@ package com.parser.lk.controller;
 import com.parser.lk.dto.request.analytics.CreateOrderRequest;
 import com.parser.lk.dto.request.analytics.OrderGuids;
 import com.parser.lk.dto.response.analytics.GetOrdersByGuidResponse;
+import com.parser.lk.dto.response.analytics.MathematicsResult;
 import com.parser.lk.dto.response.analytics.SuccessResponse;
+import com.parser.lk.services.calculationservice.MathematicsManager;
 import com.parser.lk.services.parsingmanager.OrderManager;
 import com.parser.lk.services.parsingmanager.ParserManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
@@ -22,18 +25,17 @@ public class AnalyticsRestController {
 
     private final OrderManager orderManager;
 
+    private final MathematicsManager mathematicsManager;
+
     @Autowired
-    public AnalyticsRestController(ParserManager parserManager, OrderManager orderManager) {
+    public AnalyticsRestController(
+            ParserManager parserManager,
+            OrderManager orderManager,
+            MathematicsManager mathematicsManager
+    ) {
         this.parserManager = parserManager;
         this.orderManager = orderManager;
-    }
-
-
-    @GetMapping("/work-test")
-    public SuccessResponse serverResponse() {
-        SuccessResponse response = new SuccessResponse();
-        response.setStatus(true);
-        return response;
+        this.mathematicsManager = mathematicsManager;
     }
 
     @PostMapping("/create/order")
@@ -53,6 +55,13 @@ public class AnalyticsRestController {
     @PostMapping("/orders")
     public GetOrdersByGuidResponse getOrdersByGuid(@RequestBody OrderGuids orderGuids) {
         return this.orderManager.getOrdersByGuid(orderGuids);
+    }
+
+    @GetMapping("/orders/result")
+    public List<MathematicsResult> getMathematicsByResult(
+            @RequestParam(name= "guid") String guid
+    ) {
+        return this.mathematicsManager.getResultByGuid(guid);
     }
 
 }
