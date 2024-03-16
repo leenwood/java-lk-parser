@@ -18,6 +18,6 @@ public class CompleteService implements StatusInterface {
 
     @Override
     public String getNextStatusName() {
-        return NameStatusServiceEnum.COMPLETE;
+        return null;
     }
 }
