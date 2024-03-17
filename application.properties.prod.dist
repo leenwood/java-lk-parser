@@ -15,8 +15,8 @@ spring.rabbitmq.username=root
 spring.rabbitmq.password=root
 
 spring.jpa.generate-ddl=true
-server.port=8081
-server.address=localhost
+server.port=80
+server.address=backend-java-app
 
 application.callback.lk.users=http://cybervoin.ru
 application.useragent.lk.users=lk-parser/1.0 (email@gperman.ru)
