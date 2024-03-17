@@ -20,4 +20,11 @@ services:
       RABBITMQ_DEFAULT_PASS: root
     volumes:
       - ./docker/rabbitmq/data/:/var/lib/rabbitmq
-
+  backend-java-app:
+    build:
+      context: .
+    depends_on:
+      - postgresql
+      - rabbitMq
+    ports:
+      - "8081:80"
