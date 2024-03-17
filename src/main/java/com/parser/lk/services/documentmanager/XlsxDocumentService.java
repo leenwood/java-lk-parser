@@ -92,6 +92,8 @@ public class XlsxDocumentService {
 
     }
 
+
+    //TODO метод не нужен так как данные считается в другом сервисе
     @Deprecated
     private void calculateFormula(String guid) {
         String filePath = String.format(

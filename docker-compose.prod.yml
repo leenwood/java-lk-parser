@@ -23,6 +23,7 @@ services:
   backend-java-app:
     build:
       context: .
+    container_name: "java-backend-app"
     depends_on:
       - postgresql
       - rabbitMq

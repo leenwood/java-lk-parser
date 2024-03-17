@@ -1,0 +1,33 @@
+.DEFAULT_GOAL := all
+backend-container ?= java-backend-app
+
+all: copy-configs mvn-install build up
+
+copy-configs:
+	cp docker-compose.prod.yml docker-compose.yml
+	cp application.properties.prod.dist src/main/resources/application.properties
+
+
+mvn-install:
+	mvn clean install -DskipTests=true
+
+
+build:
+	docker compose build
+
+up:
+	docker compose up -d
+
+down:
+	mvn clean
+	docker compose down
+
+stop:
+	docker compose stop
+
+logs:
+	docker logs ${backend-container}
+
+sh:
+	docker -it ${backend-container} sh
+
