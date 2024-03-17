@@ -24,5 +24,8 @@ application.headhunter.api.key=APPLSC5PEPV2IAA90AHF4HCOR9476BR4PEOG6URII746V57II
 application.areas.url=https://api.hh.ru/areas/113
 application.period.parse.vacancies=14
 application.fileoutput.path=files/xlsx
-application.http.type=http
 application.cbr.currency.url=https://cbr.ru/scripts/XML_daily.asp
+
+application.http.type=http
+application.hostname=45.90.35.14
+application.port=8081
