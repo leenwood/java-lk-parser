@@ -10,7 +10,7 @@
     </parent>
     <groupId>profit.junior</groupId>
     <artifactId>java-lk-parser</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.1-RELEASE-PROD</version>
     <name>java-lk-parser</name>
     <description>Проект созданый для урфу в качестве диплома, заказчик продукта является Artsofte</description>
     <properties>
@@ -67,6 +67,11 @@
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
+            <version>5.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
             <version>5.1.0</version>
         </dependency>
 

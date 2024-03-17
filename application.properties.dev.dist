@@ -1,5 +1,5 @@
 # Database Configuration
-spring.datasource.url=jdbc:postgresql://postgresql:5432/parser_db
+spring.datasource.url=jdbc:postgresql://localhost:5432/parser_db
 spring.datasource.username=parser_user
 spring.datasource.password=parser_password
 spring.datasource.driver-class-name=org.postgresql.Driver
