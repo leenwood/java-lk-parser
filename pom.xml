@@ -10,7 +10,7 @@
     </parent>
     <groupId>profit.junior</groupId>
     <artifactId>java-lk-parser</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.1-RELEASE-PROD</version>
     <name>java-lk-parser</name>
     <description>Проект созданый для урфу в качестве диплома, заказчик продукта является Artsofte</description>
     <properties>
@@ -80,11 +80,6 @@
             <artifactId>spring-rabbit-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-docker-compose</artifactId>
-            <scope>runtime</scope>
-        </dependency>
     </dependencies>
 
     <build>
@@ -92,20 +87,10 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>3.2.2</version>
                 <configuration>
-                    <excludeDockerCompose>false</excludeDockerCompose>
+                    <mainClass>com.parser.lk.LkParserApplication</mainClass>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>repackage</id>
-                        <goals>
-                            <goal>repackage</goal>
-                        </goals>
-                        <configuration>
-                            <skip>true</skip>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
