@@ -85,13 +85,14 @@ public class XlsxDocumentService {
                 this.writeExcelFile(order.getGuid(), vacancy);
             }
         }
-
-        this.calculateFormula(order.getGuid());
+        //TODO нет смысла в методе так как подсчет идет в другом сервисе и храниться в бд
+        //this.calculateFormula(order.getGuid());
         fileParam.setStatus(FileStatusEnum.READY);
         this.orderExcelFileParamRepository.save(fileParam);
 
     }
 
+    @Deprecated
     private void calculateFormula(String guid) {
         String filePath = String.format(
                 "%s/%s.xlsx",
