@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := all
 backend-container ?= java-backend-app
 
-all: copy-configs mvn-install build up
+all: copy-configs mvn-install build up create-folder
 
 copy-configs:
 	cp docker-compose.prod.yml docker-compose.yml
@@ -17,6 +17,9 @@ build:
 
 up:
 	docker compose up -d
+
+create-folder:
+    docker exec -it ${backend-container} mkdir -p files/xlsx
 
 down:
 	mvn clean

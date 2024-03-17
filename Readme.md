@@ -36,6 +36,11 @@ docker compose up build
 docker compose up -d
 ```
 
+```bash
+docker exec -it java-backend-app mkdir files
+docker exec -it java-backend-app mkdir files/xlsx
+```
+
 ### DEV окружение
 ```bash
 cp docker-compose.dev.yml docker-compose.yml
