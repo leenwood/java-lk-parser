@@ -29,5 +29,5 @@ logs:
 	docker logs ${backend-container}
 
 sh:
-	docker -it ${backend-container} sh
+	docker exec -it ${backend-container} sh
 
