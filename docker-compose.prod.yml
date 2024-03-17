@@ -29,3 +29,5 @@ services:
       - rabbitMq
     ports:
       - "8081:80"
+    volumes:
+      - ./files/xlsx/:/app/files/xlsx/
