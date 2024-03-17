@@ -3,6 +3,8 @@ package com.parser.lk.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.Date;
+
 @Entity
 @Data
 public class CalculationResults {
@@ -21,5 +23,7 @@ public class CalculationResults {
     private Long formulaId;
 
     private String result;
+
+    private Date createDate;
 
 }

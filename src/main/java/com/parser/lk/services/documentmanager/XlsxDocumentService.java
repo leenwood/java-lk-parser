@@ -1,6 +1,9 @@
 package com.parser.lk.services.documentmanager;
 
+import com.parser.lk.dto.FileStatusEnum;
+import com.parser.lk.entity.OrderExcelFileParam;
 import com.parser.lk.entity.Vacancy;
+import com.parser.lk.repository.OrderExcelFileParamRepository;
 import com.parser.lk.repository.VacancyRepository;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -30,22 +33,25 @@ public class XlsxDocumentService {
 
     private final ResourceLoader resourceLoader;
 
+    private final OrderExcelFileParamRepository orderExcelFileParamRepository;
+
 
     private final Logger logger = LoggerFactory.getLogger(XlsxDocumentService.class);
 
     @Value("${application.fileoutput.path}")
     private String outputPath;
 
-    public XlsxDocumentService(VacancyRepository vacancyRepository, OrderRepository orderRepository, ResourceLoader resourceLoader) {
+    public XlsxDocumentService(VacancyRepository vacancyRepository, OrderRepository orderRepository, ResourceLoader resourceLoader, OrderExcelFileParamRepository orderExcelFileParamRepository) {
         this.vacancyRepository = vacancyRepository;
         this.orderRepository = orderRepository;
         this.resourceLoader = resourceLoader;
+        this.orderExcelFileParamRepository = orderExcelFileParamRepository;
     }
 
-    public void createXlsxDocumentByOrderId(Long orderId) {
-        Optional<Order> orderOptional = this.orderRepository.findById(orderId);
+    public void createXlsxDocumentByOrderId(String guid) {
+        Optional<Order> orderOptional = this.orderRepository.findOneByGuid(guid);
         if (orderOptional.isEmpty()) {
-            this.logger.error(String.format("order by id %s not found", orderId));
+            this.logger.error(String.format("order by id %s not found", guid));
             return;
         }
         Order order = orderOptional.get();
@@ -60,6 +66,13 @@ public class XlsxDocumentService {
         if (!this.createExcelFile(order.getGuid())) {
             return;
         }
+
+        OrderExcelFileParam fileParam = new OrderExcelFileParam();
+        fileParam.setGuid(guid);
+        fileParam.setFilename(guid + ".xlsx");
+        fileParam.setStatus(FileStatusEnum.EMPTY);
+        this.orderExcelFileParamRepository.save(fileParam);
+
         int currentPage = 0;
         while (true) {
             Pageable pageable = PageRequest.of(currentPage, 100);
@@ -74,6 +87,8 @@ public class XlsxDocumentService {
         }
 
         this.calculateFormula(order.getGuid());
+        fileParam.setStatus(FileStatusEnum.READY);
+        this.orderExcelFileParamRepository.save(fileParam);
 
     }
 

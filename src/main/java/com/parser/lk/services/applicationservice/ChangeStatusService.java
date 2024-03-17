@@ -56,8 +56,7 @@ public class ChangeStatusService {
         System.out.println(message);
 
         StatusInterface service = this.applicationStatusFactory.getStatusService(
-                message.getNextStatus(),
-                message.getCurrentStatus()
+                message.getNextStatus()
         );
 
         if (service.doProcess(message.getOrderId())) {
