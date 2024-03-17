@@ -27,11 +27,11 @@ public class FilesManager {
     @Value("${application.fileoutput.path}")
     private String filesDirectoryPath;
 
-    @Value("${server.address}")
+    @Value("${application.hostname}")
     private String serverAddress;
 
 
-    @Value("${server.port}")
+    @Value("${application.port}")
     private String serverPort;
 
 

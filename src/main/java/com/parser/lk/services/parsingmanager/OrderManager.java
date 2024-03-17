@@ -23,14 +23,14 @@ public class OrderManager {
     @Value("${application.fileoutput.path}")
     private String filesDirectoryPath;
 
-    @Value("${server.address}")
+    @Value("${application.hostname}")
     private String serverAddress;
 
     @Value("${application.http.type}")
     private String httpType;
 
 
-    @Value("${server.port}")
+    @Value("${application.port}")
     private String serverPort;
 
 
