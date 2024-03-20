@@ -19,7 +19,7 @@ up:
 	docker compose up -d
 
 create-folder:
-    docker exec -it ${backend-container} mkdir -p files/xlsx
+	docker exec -it ${backend-container} mkdir -p files/xlsx
 
 down:
 	mvn clean
