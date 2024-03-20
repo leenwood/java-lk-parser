@@ -17,6 +17,13 @@ public class NameStatusServiceEnum {
 
     public static String PARSING_ERROR = "PARSING_ERROR";
 
+    public static String START_CREATE_DOCUMENT = "START_CREATE_DOCUMENT";
+
+    public static String COMPLETE_WITH_DOCUMENT = "COMPLETE_WITH_DOCUMENT";
+
+    public static String CREATING_DOCUMENT = "CREATING_DOCUMENT";
+
+
 
 
 }

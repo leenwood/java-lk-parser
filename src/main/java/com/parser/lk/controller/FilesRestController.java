@@ -28,9 +28,8 @@ public class FilesRestController {
     public SuccessResponse createExcelFile(
             @RequestParam(value = "guid") String guid
     ) {
-        this.filesManager.createExcelDocument(guid);
         SuccessResponse successResponse = new SuccessResponse();
-        successResponse.setStatus(true);
+        successResponse.setStatus(this.filesManager.startCreateExcelDocumentByGuid(guid));
         return successResponse;
     }
 

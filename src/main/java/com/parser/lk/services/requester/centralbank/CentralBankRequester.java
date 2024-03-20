@@ -44,9 +44,12 @@ public class CentralBankRequester {
         for (int i = 0; i < nodeList.getLength(); i++) {
             Element valuteElement = (Element) nodeList.item(i);
             String code = valuteElement.getElementsByTagName("CharCode").item(0).getTextContent();
+            String nominal = valuteElement.getElementsByTagName("Nominal").item(0).getTextContent();
             if (code.equals(alias)) {
                 String valueStr = valuteElement.getElementsByTagName("Value").item(0).getTextContent();
-                return Double.parseDouble(valueStr.replace(",", "."));
+                double valueDouble = Double.parseDouble(valueStr.replace(",", "."));
+                double nominalDouble = Double.parseDouble(nominal.replace(",", "."));
+                return valueDouble / nominalDouble;
             }
         }
 

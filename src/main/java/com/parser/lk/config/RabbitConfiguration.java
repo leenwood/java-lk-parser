@@ -1,4 +1,4 @@
-package com.parser.lk.queue;
+package com.parser.lk.config;
 
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.Queue;

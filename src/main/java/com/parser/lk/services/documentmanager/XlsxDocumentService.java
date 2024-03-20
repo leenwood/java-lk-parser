@@ -13,7 +13,7 @@ import com.parser.lk.repository.OrderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
+import org.springframework.context.MessageSource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.util.Locale;
 import java.util.Optional;
 
 @Service
@@ -33,6 +34,8 @@ public class XlsxDocumentService {
 
     private final ResourceLoader resourceLoader;
 
+    private final MessageSource messageSource;
+
     private final OrderExcelFileParamRepository orderExcelFileParamRepository;
 
 
@@ -41,14 +44,73 @@ public class XlsxDocumentService {
     @Value("${application.fileoutput.path}")
     private String outputPath;
 
-    public XlsxDocumentService(VacancyRepository vacancyRepository, OrderRepository orderRepository, ResourceLoader resourceLoader, OrderExcelFileParamRepository orderExcelFileParamRepository) {
+    public XlsxDocumentService(VacancyRepository vacancyRepository, OrderRepository orderRepository, ResourceLoader resourceLoader, MessageSource messageSource, OrderExcelFileParamRepository orderExcelFileParamRepository) {
         this.vacancyRepository = vacancyRepository;
         this.orderRepository = orderRepository;
         this.resourceLoader = resourceLoader;
+        this.messageSource = messageSource;
         this.orderExcelFileParamRepository = orderExcelFileParamRepository;
     }
 
-    public void createXlsxDocumentByOrderId(String guid) {
+    public boolean createXlsxDocumentByOrderId(Long orderId) {
+        Optional<Order> orderOptional = this.orderRepository.findOneById(orderId);
+        if (orderOptional.isEmpty()) {
+            this.logger.error(String.format("order by id %s not found", orderId));
+            return false;
+        }
+        Order order = orderOptional.get();
+        return this.createXlsxDocument(order);
+    }
+
+    public boolean createXlsxDocumentByGuid(String guid) {
+        Optional<Order> orderOptional = this.orderRepository.findOneByGuid(guid);
+        if (orderOptional.isEmpty()) {
+            this.logger.error(String.format("order by guid %s not found", guid));
+            return false;
+        }
+        Order order = orderOptional.get();
+        return this.createXlsxDocument(order);
+    }
+
+    protected boolean createXlsxDocument(Order order) {
+        int count = this.vacancyRepository.countByGuidAndProcessed(order.getGuid(), true);
+
+        if (count < 1) {
+            this.logger.error(String.format("vacancies by order not found (orderId:%s|guid:%s)", order.getId(), order.getGuid()));
+            return false;
+        }
+
+        if (!this.createExcelFile(order.getGuid())) {
+            return false;
+        }
+
+        OrderExcelFileParam fileParam = new OrderExcelFileParam();
+        fileParam.setGuid(order.getGuid());
+        fileParam.setFilename(order.getGuid() + ".xlsx");
+        fileParam.setStatus(FileStatusEnum.EMPTY);
+        this.orderExcelFileParamRepository.save(fileParam);
+
+        int currentPage = 0;
+        while (true) {
+            Pageable pageable = PageRequest.of(currentPage, 100);
+            Page<Vacancy> vacanciesPage = vacancyRepository.findAllByGuidAndProcessed(order.getGuid(), true, pageable);
+            if (vacanciesPage.isEmpty()) {
+                break;
+            }
+            currentPage++;
+            for (Vacancy vacancy : vacanciesPage.getContent()) {
+                this.writeExcelFile(order.getGuid(), vacancy);
+            }
+        }
+
+        fileParam.setStatus(FileStatusEnum.READY);
+        this.orderExcelFileParamRepository.save(fileParam);
+        return true;
+    }
+
+
+    @Deprecated
+    public void createXlsxDocumentByGuid_old(String guid) {
         Optional<Order> orderOptional = this.orderRepository.findOneByGuid(guid);
         if (orderOptional.isEmpty()) {
             this.logger.error(String.format("order by id %s not found", guid));
@@ -158,14 +220,29 @@ public class XlsxDocumentService {
             Row row = sheet.createRow(lastRowNum + 1); // Создаем новую строку
 
             row.createCell(0).setCellValue(vacancy.getId());
-            row.createCell(1).setCellValue("в работе");
+            row.createCell(1).setCellValue("в работе"); // area
             row.createCell(2).setCellValue(vacancy.getArea());
-            row.createCell(3).setCellValue("в работе");
+            row.createCell(3).setCellValue(
+                    this.messageSource.getMessage(
+                            vacancy.getExperience(),
+                            null,
+                            Locale.of("ru"))
+            ); // experience
             row.createCell(4).setCellValue(vacancy.getExperience());
             row.createCell(5).setCellValue(vacancy.getGrade());
-            row.createCell(6).setCellValue("в работе");
+            row.createCell(6).setCellValue(
+                    this.messageSource.getMessage(
+                            vacancy.getSchedule(),
+                            null,
+                            Locale.of("ru"))
+            ); // schedule
             row.createCell(7).setCellValue(vacancy.getSchedule());
-            row.createCell(8).setCellValue("Тип занятости");
+            row.createCell(8).setCellValue(
+                    this.messageSource.getMessage(
+                            vacancy.getEmployment(),
+                            null,
+                            Locale.of("ru"))
+            ); // employment
             row.createCell(9).setCellValue(vacancy.getEmployment());
             row.createCell(10).setCellValue(vacancy.getName());
             row.createCell(11).setCellValue(vacancy.getVacancyDescription());

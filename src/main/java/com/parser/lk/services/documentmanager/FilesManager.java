@@ -7,6 +7,8 @@ import com.parser.lk.entity.Order;
 import com.parser.lk.entity.OrderExcelFileParam;
 import com.parser.lk.repository.OrderExcelFileParamRepository;
 import com.parser.lk.repository.OrderRepository;
+import com.parser.lk.services.applicationservice.NameStatusServiceEnum;
+import com.parser.lk.services.parsingmanager.ParserManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +19,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,10 +46,18 @@ public class FilesManager {
 
     private final OrderExcelFileParamRepository orderExcelFileParamRepository;
 
-    public FilesManager(OrderRepository orderRepository, XlsxDocumentService xlsxDocumentService, OrderExcelFileParamRepository orderExcelFileParamRepository) {
+    private final ParserManager parserManager;
+
+    public FilesManager(
+            OrderRepository orderRepository,
+            XlsxDocumentService xlsxDocumentService,
+            OrderExcelFileParamRepository orderExcelFileParamRepository,
+            ParserManager parserManager
+    ) {
         this.orderRepository = orderRepository;
         this.xlsxDocumentService = xlsxDocumentService;
         this.orderExcelFileParamRepository = orderExcelFileParamRepository;
+        this.parserManager = parserManager;
     }
 
     public DocumentExcelListResponse getDocumentListV2() {
@@ -130,8 +141,40 @@ public class FilesManager {
         return object;
     }
 
-    public void createExcelDocument(String guid) {
-        this.xlsxDocumentService.createXlsxDocumentByOrderId(guid);
+    public boolean startCreateExcelDocumentByGuid(String guid) {
+        Optional<Order> optionalOrder = this.orderRepository.findOneByGuid(guid);
+        if (optionalOrder.isEmpty()) {
+            this.logger.error(String.format("Order by guid %s not found", guid));
+            return false;
+        }
+        Optional<OrderExcelFileParam> orderExcelFileParam = this.orderExcelFileParamRepository.findOneByGuid(guid);
+        if(orderExcelFileParam.isPresent()) {
+            this.logger.error(String.format("File is create with guid %s not found", guid));
+            return false;
+        }
+
+        Order order = optionalOrder.get();
+        order.setStatus(NameStatusServiceEnum.START_CREATE_DOCUMENT);
+
+        this.parserManager.changeStatusQueue(
+                null,
+                NameStatusServiceEnum.CREATING_DOCUMENT,
+                NameStatusServiceEnum.START_CREATE_DOCUMENT,
+                order.getId()
+        );
+
+        this.orderRepository.save(order);
+
+        return true;
+    }
+
+
+    public boolean createExcelDocumentByGuid(String guid) {
+        return this.xlsxDocumentService.createXlsxDocumentByGuid(guid);
+    }
+
+    public boolean createExcelDocumentByOrderId(Long orderId) {
+        return this.xlsxDocumentService.createXlsxDocumentByOrderId(orderId);
     }
 
     private String extractGuid(String name) {
