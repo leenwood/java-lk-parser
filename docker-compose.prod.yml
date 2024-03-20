@@ -9,8 +9,8 @@ services:
       - POSTGRES_DB=parser_db
       - POSTGRES_USER=parser_user
       - POSTGRES_PASSWORD=parser_password
-    expose:
-      - "5432"
+    ports:
+      - "5433:5432"
   rabbitMq:
     image: rabbitmq:3.9-alpine
     expose:
