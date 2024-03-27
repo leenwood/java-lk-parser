@@ -7,6 +7,7 @@ import com.parser.lk.entity.Order;
 import com.parser.lk.entity.OrderExcelFileParam;
 import com.parser.lk.repository.OrderExcelFileParamRepository;
 import com.parser.lk.repository.OrderRepository;
+import com.parser.lk.repository.VacancyRepository;
 import com.parser.lk.services.applicationservice.NameStatusServiceEnum;
 import com.parser.lk.services.parsingmanager.ParserManager;
 import org.slf4j.Logger;
@@ -48,16 +49,19 @@ public class FilesManager {
 
     private final ParserManager parserManager;
 
+    private final VacancyRepository vacancyRepository;
+
     public FilesManager(
             OrderRepository orderRepository,
             XlsxDocumentService xlsxDocumentService,
             OrderExcelFileParamRepository orderExcelFileParamRepository,
-            ParserManager parserManager
+            ParserManager parserManager, VacancyRepository vacancyRepository
     ) {
         this.orderRepository = orderRepository;
         this.xlsxDocumentService = xlsxDocumentService;
         this.orderExcelFileParamRepository = orderExcelFileParamRepository;
         this.parserManager = parserManager;
+        this.vacancyRepository = vacancyRepository;
     }
 
     public DocumentExcelListResponse getDocumentListV2() {
@@ -154,6 +158,14 @@ public class FilesManager {
         }
 
         Order order = optionalOrder.get();
+
+        if (!order.getStatus().equals(NameStatusServiceEnum.COMPLETE)) {
+            this.logger.error(String.format("Order with guid %s is not complete", guid));
+            return false;
+        }
+
+
+
         order.setStatus(NameStatusServiceEnum.START_CREATE_DOCUMENT);
 
         this.parserManager.changeStatusQueue(
@@ -169,6 +181,9 @@ public class FilesManager {
     }
 
 
+    /**
+     * Внимание, метод не асинхронный! Если вызовете, все зависнет на этапе комплияции.
+     */
     public boolean createExcelDocumentByGuid(String guid) {
         return this.xlsxDocumentService.createXlsxDocumentByGuid(guid);
     }

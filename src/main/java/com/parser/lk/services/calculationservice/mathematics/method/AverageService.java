@@ -61,10 +61,12 @@ public class AverageService implements MathematicsMethodInterface {
         for (Vacancy vacancy : this.vacancyRepository.findAllByGuid(order.getGuid())) {
             count++;
 
-            if (vacancy.getSalaryTo() > 0) {
-                value += vacancy.getSalaryTo();
+            if (vacancy.getSalaryFrom() > 0 && vacancy.getSalaryTo() > 0) {
+                value += ((vacancy.getSalaryFrom() + vacancy.getSalaryTo()) / 2);
             } else if (vacancy.getSalaryFrom() > 0) {
                 value += vacancy.getSalaryFrom();
+            } else if (vacancy.getSalaryTo() > 0) {
+                value += vacancy.getSalaryTo();
             } else {
                 continue;
             }

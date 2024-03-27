@@ -1,8 +1,10 @@
 package com.parser.lk.services.documentmanager;
 
 import com.parser.lk.dto.FileStatusEnum;
+import com.parser.lk.entity.CalculationResults;
 import com.parser.lk.entity.OrderExcelFileParam;
 import com.parser.lk.entity.Vacancy;
+import com.parser.lk.repository.CalculationResultsRepository;
 import com.parser.lk.repository.OrderExcelFileParamRepository;
 import com.parser.lk.repository.VacancyRepository;
 import org.apache.poi.ss.usermodel.*;
@@ -38,18 +40,28 @@ public class XlsxDocumentService {
 
     private final OrderExcelFileParamRepository orderExcelFileParamRepository;
 
+    private final CalculationResultsRepository calculationResultsRepository;
+
 
     private final Logger logger = LoggerFactory.getLogger(XlsxDocumentService.class);
 
     @Value("${application.fileoutput.path}")
     private String outputPath;
 
-    public XlsxDocumentService(VacancyRepository vacancyRepository, OrderRepository orderRepository, ResourceLoader resourceLoader, MessageSource messageSource, OrderExcelFileParamRepository orderExcelFileParamRepository) {
+    public XlsxDocumentService(
+            VacancyRepository vacancyRepository,
+            OrderRepository orderRepository,
+            ResourceLoader resourceLoader,
+            MessageSource messageSource,
+            OrderExcelFileParamRepository orderExcelFileParamRepository,
+            CalculationResultsRepository calculationResultsRepository
+    ) {
         this.vacancyRepository = vacancyRepository;
         this.orderRepository = orderRepository;
         this.resourceLoader = resourceLoader;
         this.messageSource = messageSource;
         this.orderExcelFileParamRepository = orderExcelFileParamRepository;
+        this.calculationResultsRepository = calculationResultsRepository;
     }
 
     public boolean createXlsxDocumentByOrderId(Long orderId) {
@@ -102,6 +114,18 @@ public class XlsxDocumentService {
                 this.writeExcelFile(order.getGuid(), vacancy);
             }
         }
+
+
+        int lineNumber = 1;
+        for (CalculationResults result : this.calculationResultsRepository.findAllByGuid(order.getGuid())) {
+            this.insertCalculationResult(
+                    order.getGuid(),
+                    result.getFormulaAlias(),
+                    result.getResult()
+            );
+            lineNumber++;
+        }
+
 
         fileParam.setStatus(FileStatusEnum.READY);
         this.orderExcelFileParamRepository.save(fileParam);
@@ -175,20 +199,20 @@ public class XlsxDocumentService {
             row.createCell(22).setCellValue("от");
 
             Cell cell0 = row.createCell(23);
-            cell0.setCellFormula(String.format("MEDIAN(N2:N%s)", lastRowNum+1));
+            cell0.setCellFormula(String.format("MEDIAN(N2:N%s)", lastRowNum + 1));
 
             Cell cell1 = row.createCell(24);
-            cell1.setCellFormula(String.format("AVERAGE(N2:N%s)", lastRowNum+1));
+            cell1.setCellFormula(String.format("AVERAGE(N2:N%s)", lastRowNum + 1));
 
             row = sheet.getRow(2);
 
             row.createCell(22).setCellValue("до");
 
             cell0 = row.createCell(23);
-            cell0.setCellFormula(String.format("MEDIAN(O2:O%s)", lastRowNum+1));
+            cell0.setCellFormula(String.format("MEDIAN(O2:O%s)", lastRowNum + 1));
 
             cell1 = row.createCell(24);
-            cell1.setCellFormula(String.format("AVERAGE(O2:O%s)", lastRowNum+1));
+            cell1.setCellFormula(String.format("AVERAGE(O2:O%s)", lastRowNum + 1));
 
 
             try (FileOutputStream fileOut = new FileOutputStream(filePath)) {
@@ -220,7 +244,7 @@ public class XlsxDocumentService {
             Row row = sheet.createRow(lastRowNum + 1); // Создаем новую строку
 
             row.createCell(0).setCellValue(vacancy.getId());
-            row.createCell(1).setCellValue("в работе"); // area
+            row.createCell(1).setCellValue(vacancy.getArea()); // area
             row.createCell(2).setCellValue(vacancy.getArea());
             row.createCell(3).setCellValue(
                     this.messageSource.getMessage(
@@ -228,37 +252,71 @@ public class XlsxDocumentService {
                             null,
                             Locale.of("ru"))
             ); // experience
-            row.createCell(4).setCellValue(vacancy.getExperience());
-            row.createCell(5).setCellValue(vacancy.getGrade());
-            row.createCell(6).setCellValue(
+            row.createCell(4).setCellValue(vacancy.getGrade());
+            row.createCell(5).setCellValue(
                     this.messageSource.getMessage(
                             vacancy.getSchedule(),
                             null,
                             Locale.of("ru"))
             ); // schedule
-            row.createCell(7).setCellValue(vacancy.getSchedule());
-            row.createCell(8).setCellValue(
+            row.createCell(6).setCellValue(
                     this.messageSource.getMessage(
                             vacancy.getEmployment(),
                             null,
                             Locale.of("ru"))
             ); // employment
-            row.createCell(9).setCellValue(vacancy.getEmployment());
-            row.createCell(10).setCellValue(vacancy.getName());
-            row.createCell(11).setCellValue(vacancy.getVacancyDescription());
-            row.createCell(12).setCellValue(vacancy.getFunctionalDescription());
-            row.createCell(13).setCellValue(vacancy.getSalaryFrom());
-            row.createCell(14).setCellValue(vacancy.getSalaryTo());
-            row.createCell(15).setCellValue(vacancy.getSalaryGross());
-            row.createCell(16).setCellValue(vacancy.getCurrency());
-            row.createCell(17).setCellValue(vacancy.getOriginalUrl());
-            row.createCell(18).setCellValue(vacancy.getExternalId());
+            row.createCell(7).setCellValue(vacancy.getName());
+            row.createCell(8).setCellValue(vacancy.getVacancyDescription());
+            row.createCell(9).setCellValue(vacancy.getFunctionalDescription());
+            row.createCell(10).setCellValue(vacancy.getSalaryFrom());
+            row.createCell(11).setCellValue(vacancy.getSalaryTo());
+            row.createCell(12).setCellValue(vacancy.getSalaryGross() ? "Да" : "Нет");
+            row.createCell(13).setCellValue(vacancy.getCurrency());
+            row.createCell(14).setCellValue(vacancy.getOriginalUrl());
+            row.createCell(15).setCellValue(vacancy.getExternalId());
 
             try (FileOutputStream fileOut = new FileOutputStream(filePath)) {
                 workbook.write(fileOut);
                 this.logger.info(String.format("Vacancy save in xlsx file (vacancy id:%s)", vacancy.getId()));
             } catch (IOException e) {
                 this.logger.error("Error while save vacancy \n " + e.toString());
+            }
+
+        } catch (IOException e) {
+            this.logger.error(e.toString());
+        }
+    }
+
+    private void insertCalculationResult(
+            String guid,
+            String nameAlias,
+            String result
+    ) {
+        String filePath = String.format(
+                "%s/%s.xlsx",
+                this.outputPath,
+                guid
+        );
+
+        try (FileInputStream fileIn = new FileInputStream(filePath);
+             Workbook workbook = new XSSFWorkbook(fileIn)) {
+
+            Sheet sheet = workbook.getSheetAt(0); // Получаем первый лист
+            int lastRowNum = sheet.getLastRowNum();
+
+            Row row = sheet.createRow(lastRowNum+1); // Создаем новую строку
+
+            row.createCell(23).setCellValue(this.messageSource.getMessage(
+                    nameAlias,
+                    null,
+                    Locale.of("ru")));
+            row.createCell(24).setCellValue(result);
+
+            try (FileOutputStream fileOut = new FileOutputStream(filePath)) {
+                workbook.write(fileOut);
+                this.logger.info(String.format("Calculation save in xlsx file (guid %s)", guid));
+            } catch (IOException e) {
+                this.logger.error("Error while save calculation result \n " + e.toString());
             }
 
         } catch (IOException e) {
@@ -283,27 +341,27 @@ public class XlsxDocumentService {
             headerRow.createCell(1).setCellValue("Регион");
             headerRow.createCell(2).setCellValue("Регион (ID)");
             headerRow.createCell(3).setCellValue("Опыт работы");
-            headerRow.createCell(4).setCellValue("Опыт работы (Alias)");
-            headerRow.createCell(5).setCellValue("Грейд");
-            headerRow.createCell(6).setCellValue("График работы");
-            headerRow.createCell(7).setCellValue("График работы (Alias)");
-            headerRow.createCell(8).setCellValue("Тип занятости");
-            headerRow.createCell(9).setCellValue("Тип занятости (Alias)");
-            headerRow.createCell(10).setCellValue("Название вакансии");
-            headerRow.createCell(11).setCellValue("Описание вакансии");
-            headerRow.createCell(12).setCellValue("Функциональное описание вакансии");
-            headerRow.createCell(13).setCellValue("Зарплата от");
-            headerRow.createCell(14).setCellValue("Зарплата до");
-            headerRow.createCell(15).setCellValue("До вычета налога (bool)");
-            headerRow.createCell(16).setCellValue("Курс");
-            headerRow.createCell(17).setCellValue("Ссылка на вакансию");
-            headerRow.createCell(18).setCellValue("ID HH вакансии");
+//            headerRow.createCell(4).setCellValue("Опыт работы (Alias)");
+            headerRow.createCell(4).setCellValue("Грейд");
+            headerRow.createCell(5).setCellValue("График работы");
+//            headerRow.createCell(7).setCellValue("График работы (Alias)");
+            headerRow.createCell(6).setCellValue("Тип занятости");
+//            headerRow.createCell(9).setCellValue("Тип занятости (Alias)");
+            headerRow.createCell(7).setCellValue("Название вакансии");
+            headerRow.createCell(8).setCellValue("Описание вакансии");
+            headerRow.createCell(9).setCellValue("Функциональное описание вакансии");
+            headerRow.createCell(10).setCellValue("Зарплата от");
+            headerRow.createCell(11).setCellValue("Зарплата до");
+            headerRow.createCell(12).setCellValue("До вычета налога");
+            headerRow.createCell(13).setCellValue("Курс");
+            headerRow.createCell(14).setCellValue("Ссылка на вакансию");
+            headerRow.createCell(15).setCellValue("ID HH вакансии");
             headerRow.createCell(20).setCellValue("GUID:");
             headerRow.createCell(21).setCellValue(guid);
 
 
-            headerRow.createCell(23).setCellValue("Медиана зарплата");
-            headerRow.createCell(24).setCellValue("Средняя зарплата");
+            headerRow.createCell(23).setCellValue("Результаты");
+            headerRow.createCell(24).setCellValue("В рублях");
 
             for (int i = 0; i < headerRow.getLastCellNum(); i++) {
                 sheet.autoSizeColumn(i);

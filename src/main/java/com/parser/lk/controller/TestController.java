@@ -1,6 +1,8 @@
 package com.parser.lk.controller;
 
 
+import com.parser.lk.entity.CalculationResults;
+import com.parser.lk.repository.CalculationResultsRepository;
 import com.parser.lk.services.applicationservice.ChangeStatusService;
 import com.parser.lk.services.applicationservice.applicationstatus.PostProcessingService;
 import com.parser.lk.services.calculationservice.CalculationWorkflow;
@@ -33,13 +35,16 @@ public class TestController {
 
     private final CalculationWorkflow calculationWorkflow;
 
+    private final CalculationResultsRepository calculationResultsRepository;
+
     public TestController(
             ChangeStatusService changeStatusService,
             PostProcessingService postProcessingService,
             VacanciesParser vacanciesParser,
             XlsxDocumentService xlsxDocumentService,
             CentralBankRequester centralBankRequester,
-            CalculationWorkflow calculationWorkflow
+            CalculationWorkflow calculationWorkflow,
+            CalculationResultsRepository calculationResultsRepository
     ) {
         this.changeStatusService = changeStatusService;
         this.postProcessingService = postProcessingService;
@@ -47,6 +52,7 @@ public class TestController {
         this.xlsxDocumentService = xlsxDocumentService;
         this.centralBankRequester = centralBankRequester;
         this.calculationWorkflow = calculationWorkflow;
+        this.calculationResultsRepository = calculationResultsRepository;
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/vacancies", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -96,6 +102,15 @@ public class TestController {
     @RequestMapping(method = RequestMethod.GET, value = "/test3", produces = MediaType.APPLICATION_JSON_VALUE)
     public String test3(@RequestParam(name = "orderId") Long orderId) throws Exception {
         this.calculationWorkflow.baseWorkflow(orderId);
+        return "21";
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/test4", produces = MediaType.APPLICATION_JSON_VALUE)
+    public String test4(@RequestParam(name = "orderId") String orderId) throws Exception {
+        for (CalculationResults calculationResults : this.calculationResultsRepository.findAllByGuid(orderId)) {
+            System.out.println(calculationResults.getResult());
+            System.out.println(calculationResults.getFormulaAlias());
+        }
         return "21";
     }
 }

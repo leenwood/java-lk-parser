@@ -15,7 +15,7 @@ public class Salary {
 
     private String currency;
 
-    @JsonProperty("salaryGross")
+    @JsonProperty("gross")
     private boolean salaryGross;
 
 }
