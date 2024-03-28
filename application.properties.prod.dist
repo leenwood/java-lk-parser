@@ -27,5 +27,5 @@ application.fileoutput.path=files/xlsx
 application.cbr.currency.url=https://cbr.ru/scripts/XML_daily.asp
 
 application.http.type=http
-application.hostname=45.90.35.14
-application.port=8081
+application.hostname=109.71.242.120
+application.port=80

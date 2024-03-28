@@ -266,7 +266,7 @@ public class XlsxDocumentService {
                             Locale.of("ru"))
             ); // employment
             row.createCell(7).setCellValue(vacancy.getName());
-            row.createCell(8).setCellValue(vacancy.getVacancyDescription());
+            row.createCell(8).setCellValue(this.extractTextFromHTML(vacancy.getVacancyDescription()));
             row.createCell(9).setCellValue(vacancy.getFunctionalDescription());
             row.createCell(10).setCellValue(vacancy.getSalaryFrom());
             row.createCell(11).setCellValue(vacancy.getSalaryTo());
@@ -376,6 +376,10 @@ public class XlsxDocumentService {
         }
         this.logger.info(String.format("File with name %s.xlsx created", guid));
         return true;
+    }
+
+    private String extractTextFromHTML(String inputText) {
+        return inputText.replaceAll("\\<.*?\\>", "");
     }
 
 }
