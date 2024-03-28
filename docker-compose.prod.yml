@@ -28,6 +28,6 @@ services:
       - postgresql
       - rabbitMq
     ports:
-      - "8081:80"
+      - "80:80"
     volumes:
       - ./files/xlsx/:/app/files/xlsx/
