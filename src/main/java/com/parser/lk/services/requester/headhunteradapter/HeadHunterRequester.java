@@ -1,5 +1,6 @@
 package com.parser.lk.services.requester.headhunteradapter;
 
+import com.parser.lk.services.requester.headhunteradapter.areacache.AreaCache;
 import com.parser.lk.services.requester.headhunteradapter.dto.AreaResponse;
 import com.parser.lk.services.requester.headhunteradapter.dto.VacanciesResponse;
 import com.parser.lk.services.requester.headhunteradapter.dto.VacancyResponse;
@@ -32,6 +33,13 @@ public class HeadHunterRequester {
     private String areasUrl;
 
 
+    private final AreaCache areaCache;
+
+    public HeadHunterRequester(AreaCache areaCache) {
+        this.areaCache = areaCache;
+    }
+
+
     public VacanciesResponse getVacancies(HeadHunterFiltersParam filters) {
         this.restTemplate.getMessageConverters().addFirst(new StringHttpMessageConverter(StandardCharsets.UTF_8));
         ResponseEntity<VacanciesResponse> response = this.restTemplate.exchange(
@@ -51,6 +59,21 @@ public class HeadHunterRequester {
                 this.getConfiguration(),
                 AreaResponse.class
         ).getBody();
+    }
+
+    public AreaResponse getAreaById(String id) {
+        if (this.areaCache.isEmpty()) {
+            AreaResponse response = this.getAreasByDictionary();
+            this.areaCache.createCache(response);
+            return this.restTemplate.exchange(
+                    String.format("https://api.hh.ru/areas/%s", id),
+                    HttpMethod.GET,
+                    this.getConfiguration(),
+                    AreaResponse.class
+            ).getBody();
+        } else {
+            return this.areaCache.getById(id);
+        }
     }
 
     public int getPagesVacanciesByFilter(HeadHunterFiltersParam filters) {

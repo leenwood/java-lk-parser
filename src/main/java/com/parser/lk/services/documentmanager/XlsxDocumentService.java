@@ -7,6 +7,7 @@ import com.parser.lk.entity.Vacancy;
 import com.parser.lk.repository.CalculationResultsRepository;
 import com.parser.lk.repository.OrderExcelFileParamRepository;
 import com.parser.lk.repository.VacancyRepository;
+import com.parser.lk.services.requester.headhunteradapter.HeadHunterRequester;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -38,6 +39,8 @@ public class XlsxDocumentService {
 
     private final MessageSource messageSource;
 
+    private final HeadHunterRequester headHunterRequester;
+
     private final OrderExcelFileParamRepository orderExcelFileParamRepository;
 
     private final CalculationResultsRepository calculationResultsRepository;
@@ -53,6 +56,7 @@ public class XlsxDocumentService {
             OrderRepository orderRepository,
             ResourceLoader resourceLoader,
             MessageSource messageSource,
+            HeadHunterRequester headHunterRequester,
             OrderExcelFileParamRepository orderExcelFileParamRepository,
             CalculationResultsRepository calculationResultsRepository
     ) {
@@ -60,6 +64,7 @@ public class XlsxDocumentService {
         this.orderRepository = orderRepository;
         this.resourceLoader = resourceLoader;
         this.messageSource = messageSource;
+        this.headHunterRequester = headHunterRequester;
         this.orderExcelFileParamRepository = orderExcelFileParamRepository;
         this.calculationResultsRepository = calculationResultsRepository;
     }
@@ -244,7 +249,7 @@ public class XlsxDocumentService {
             Row row = sheet.createRow(lastRowNum + 1); // Создаем новую строку
 
             row.createCell(0).setCellValue(vacancy.getId());
-            row.createCell(1).setCellValue(vacancy.getArea()); // area
+            row.createCell(1).setCellValue(this.headHunterRequester.getAreaById(vacancy.getArea()).getName()); // area
             row.createCell(2).setCellValue(vacancy.getArea());
             row.createCell(3).setCellValue(
                     this.messageSource.getMessage(
