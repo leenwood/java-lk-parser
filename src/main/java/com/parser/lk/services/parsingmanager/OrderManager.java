@@ -65,8 +65,6 @@ public class OrderManager {
             orders.getData().add(orderResponse);
         }
 
-
-
         return orders;
     }
 

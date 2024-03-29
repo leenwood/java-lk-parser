@@ -10,6 +10,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 
@@ -48,9 +52,13 @@ public class CompleteWithDocumentService implements StatusInterface {
         }
         Order order = orderOptional.get();
 
+        LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(order.getTimestamp()), ZoneId.systemDefault());
+
         String text = String.format(
-                "Номер запроса - %s\nДокумент создан, ссылка для скачивания:\n",
-                order.getGuid()
+                "Номер запроса - %s\nТекст запроса - %s\nДата запроса - %s\nДокумент создан, ссылка для скачивания:\n",
+                order.getGuid(),
+                order.getSearchText(),
+                dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
         );
         String url = String.format(
                 "%s://%s:%s/api/v1/files/excel/%s",
