@@ -1,0 +1,37 @@
+package com.parser.lk.services.telegrambotservice;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.objects.Update;
+
+
+public class TelegramBot extends TelegramLongPollingBot {
+
+
+    @Value("${telegram.bot.name}")
+    private String botUsername;
+
+
+    @Value("${telegram.bot.token}")
+    private String botToken;
+
+
+    @Override
+    public void onUpdateReceived(Update update) {
+        System.out.println(update.getChatMember().getChat().getId());
+    }
+
+    @Override
+    public String getBotUsername() {
+        // Возвращает имя вашего бота
+        return this.botUsername;
+    }
+
+    @Override
+    public String getBotToken() {
+        // Возвращает токен вашего бота
+        return this.botToken;
+    }
+
+}

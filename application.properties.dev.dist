@@ -27,5 +27,9 @@ application.fileoutput.path=files/xlsx
 application.cbr.currency.url=https://cbr.ru/scripts/XML_daily.asp
 
 application.http.type=http
-application.hostname=45.90.35.14
+application.hostname=localhost
 application.port=8081
+
+telegram.bot.token=6375777246:AAH-NuGrZNnWVFObfRj8q4qhrmrzDy6B_5I
+telegram.bot.name=ParserLeenwoodBot
+telegram.bot.chat.id=213
