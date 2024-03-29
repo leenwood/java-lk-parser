@@ -121,7 +121,7 @@ public class TestController {
 
     @RequestMapping(method = RequestMethod.GET, value = "/test5", produces = MediaType.APPLICATION_JSON_VALUE)
     public String test5(@RequestParam(name = "text") String text) throws Exception {
-        this.telegramNotificationService.sendNotification(text);
+        this.telegramNotificationService.sendNotification(text, "https://www.youtube.com/watch?v=3_zofPNyLq4&list=RDUpD8Yycy9aM&index=4");
         return "21";
     }
 }

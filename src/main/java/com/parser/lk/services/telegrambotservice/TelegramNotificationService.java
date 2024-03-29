@@ -13,8 +13,8 @@ public class TelegramNotificationService {
     }
 
 
-    public boolean sendNotification(String message) {
-        return this.telegramBot.sendMessage(message);
+    public boolean sendNotification(String message, String url) {
+        return this.telegramBot.sendMessage(message, url);
     }
 
 }

@@ -9,7 +9,12 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
@@ -25,7 +30,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     @Value("${telegram.bot.chat.id}")
     private String chatId;
 
-    private final Logger logger = LoggerFactory.getLogger(CreatingDocumentService.class);
+    private final Logger logger = LoggerFactory.getLogger(TelegramBot.class);
 
 
     @Override
@@ -33,10 +38,15 @@ public class TelegramBot extends TelegramLongPollingBot {
         System.out.println(update.toString());
     }
 
-    public boolean sendMessage(String text) {
+    public boolean sendMessage(String text, String url) {
         SendMessage message = new SendMessage();
         message.setChatId(this.chatId);
         message.setText(text);
+
+        if (url != null || url != "") {
+            message.setReplyMarkup(this.createButton(url));
+        }
+
         try {
             execute(message); // Отправляем сообщение
         } catch (TelegramApiException e) {
@@ -56,6 +66,23 @@ public class TelegramBot extends TelegramLongPollingBot {
     public String getBotToken() {
         // Возвращает токен вашего бота
         return this.botToken;
+    }
+
+    private InlineKeyboardMarkup createButton(String url) {
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        List <List<InlineKeyboardButton>> rowsInline = new ArrayList< >();
+        List < InlineKeyboardButton > rowInline = new ArrayList < > ();
+
+        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
+        inlineKeyboardButton.setUrl(url);
+        inlineKeyboardButton.setText("Download");
+        inlineKeyboardButton.setCallbackData("Call back data");
+
+        rowInline.add(inlineKeyboardButton);
+
+        rowsInline.add(rowInline);
+        markupInline.setKeyboard(rowsInline);
+        return markupInline;
     }
 
 }
