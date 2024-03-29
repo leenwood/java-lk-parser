@@ -8,6 +8,8 @@ import com.parser.lk.entity.Order;
 import com.parser.lk.entity.OrderExcelFileParam;
 import com.parser.lk.repository.OrderExcelFileParamRepository;
 import com.parser.lk.repository.OrderRepository;
+import com.parser.lk.repository.VacancyRepository;
+import com.parser.lk.services.applicationservice.NameStatusServiceEnum;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -38,25 +40,45 @@ public class OrderManager {
 
     private final OrderExcelFileParamRepository orderExcelFileParamRepository;
 
-    public OrderManager(OrderRepository orderRepository, OrderExcelFileParamRepository orderExcelFileParamRepository) {
+    private final VacancyRepository vacancyRepository;
+
+    public OrderManager(
+            OrderRepository orderRepository,
+            OrderExcelFileParamRepository orderExcelFileParamRepository,
+            VacancyRepository vacancyRepository
+    ) {
         this.orderRepository = orderRepository;
         this.orderExcelFileParamRepository = orderExcelFileParamRepository;
+        this.vacancyRepository = vacancyRepository;
     }
-    
+
     public GetOrdersByGuidResponse getOrders() {
         GetOrdersByGuidResponse orders = new GetOrdersByGuidResponse();
         for (Order order : this.orderRepository.findAll()) {
 
             OrderResponse orderResponse = this.getOrderResponse(order);
+            if (this.nameStatusServiceHigherParsing(orderResponse.getStatus())) {
+                orderResponse.setVacancyCount(this.vacancyRepository.countByGuid(orderResponse.getGuid()));
+            }
 
 
             orders.getData().add(orderResponse);
         }
 
+
+
         return orders;
     }
 
+    private boolean nameStatusServiceHigherParsing(String status) {
+        if (status != NameStatusServiceEnum.PARSING &&
+                status != NameStatusServiceEnum.PARSING_ERROR &&
+                status != NameStatusServiceEnum.START_PARSING) {
+            return true;
+        }
 
+        return false;
+    }
 
 
     public GetOrdersByGuidResponse getOrdersByGuid(OrderGuids guids) {
@@ -71,6 +93,9 @@ public class OrderManager {
 
             Order order = orderOptional.get();
             OrderResponse orderResponse = this.getOrderResponse(order);
+            if (this.nameStatusServiceHigherParsing(orderResponse.getStatus())) {
+                orderResponse.setVacancyCount(this.vacancyRepository.countByGuid(orderResponse.getGuid()));
+            }
 
 
             orders.getData().add(orderResponse);

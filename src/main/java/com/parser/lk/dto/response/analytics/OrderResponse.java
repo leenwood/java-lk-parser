@@ -12,6 +12,8 @@ public class OrderResponse {
 
     private Long id;
 
+    private Integer vacancyCount;
+
     private String status;
 
     private String filePath;

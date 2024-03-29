@@ -18,4 +18,6 @@ public interface VacancyRepository extends CrudRepository<Vacancy, Long> {
 
     public Iterable<Vacancy> findAllByGuid(String guid);
 
+    public Integer countByGuid(String guid);
+
 }
