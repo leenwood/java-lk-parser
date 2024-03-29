@@ -8,6 +8,7 @@ import com.parser.lk.services.applicationservice.applicationstatus.PostProcessin
 import com.parser.lk.services.calculationservice.CalculationWorkflow;
 import com.parser.lk.services.documentmanager.XlsxDocumentService;
 import com.parser.lk.services.requester.centralbank.CentralBankRequester;
+import com.parser.lk.services.telegrambotservice.TelegramNotificationService;
 import com.parser.lk.services.vacanciesparser.VacanciesParser;
 import com.parser.lk.services.vacanciesparser.dto.HeadHunterFiltersParam;
 import com.parser.lk.services.vacanciesparser.dto.vacancies.Vacancies;
@@ -37,6 +38,8 @@ public class TestController {
 
     private final CalculationResultsRepository calculationResultsRepository;
 
+    private final TelegramNotificationService telegramNotificationService;
+
     public TestController(
             ChangeStatusService changeStatusService,
             PostProcessingService postProcessingService,
@@ -44,7 +47,8 @@ public class TestController {
             XlsxDocumentService xlsxDocumentService,
             CentralBankRequester centralBankRequester,
             CalculationWorkflow calculationWorkflow,
-            CalculationResultsRepository calculationResultsRepository
+            CalculationResultsRepository calculationResultsRepository,
+            TelegramNotificationService telegramNotificationService
     ) {
         this.changeStatusService = changeStatusService;
         this.postProcessingService = postProcessingService;
@@ -53,6 +57,7 @@ public class TestController {
         this.centralBankRequester = centralBankRequester;
         this.calculationWorkflow = calculationWorkflow;
         this.calculationResultsRepository = calculationResultsRepository;
+        this.telegramNotificationService = telegramNotificationService;
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/vacancies", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -111,6 +116,12 @@ public class TestController {
             System.out.println(calculationResults.getResult());
             System.out.println(calculationResults.getFormulaAlias());
         }
+        return "21";
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/test5", produces = MediaType.APPLICATION_JSON_VALUE)
+    public String test5(@RequestParam(name = "text") String text) throws Exception {
+        this.telegramNotificationService.sendNotification(text);
         return "21";
     }
 }
