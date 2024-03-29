@@ -350,8 +350,8 @@ public class XlsxDocumentService {
             headerRow.createCell(7).setCellValue("Название вакансии");
             headerRow.createCell(8).setCellValue("Описание вакансии");
             headerRow.createCell(9).setCellValue("Функциональное описание вакансии");
-            headerRow.createCell(10).setCellValue("Зарплата от");
-            headerRow.createCell(11).setCellValue("Зарплата до");
+            headerRow.createCell(10).setCellValue("Зарплата от (RUB)");
+            headerRow.createCell(11).setCellValue("Зарплата до (RUB)");
             headerRow.createCell(12).setCellValue("До вычета налога");
             headerRow.createCell(13).setCellValue("Курс");
             headerRow.createCell(14).setCellValue("Ссылка на вакансию");
