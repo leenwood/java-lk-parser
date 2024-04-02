@@ -1,10 +1,10 @@
 package com.parser.lk.services.applicationservice;
 
 import com.parser.lk.entity.Order;
-import com.parser.lk.queue.MessageSender;
 import com.parser.lk.queue.OrderMessage;
 import com.parser.lk.queue.OrderMessageHandler;
 import com.parser.lk.repository.OrderRepository;
+import com.parser.lk.services.applicationservice.applicationstatus.StatusInterface;
 import com.parser.lk.services.parsingmanager.ParserManager;
 import com.parser.lk.services.requester.sendrequest.CallbackRequester;
 import com.parser.lk.services.requester.sendrequest.dto.NotificationBodyRequest;

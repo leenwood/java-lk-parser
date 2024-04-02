@@ -1,18 +1,15 @@
 package com.parser.lk.services.applicationservice.applicationstatus;
 
 import com.parser.lk.services.applicationservice.NameStatusServiceEnum;
-import com.parser.lk.services.applicationservice.StatusInterface;
 import com.parser.lk.services.documentmanager.FilesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service("CREATING_DOCUMENT")
-public class CreatingDocumentService implements StatusInterface {
+public class CreatingDocumentService extends BaseStatusService implements StatusInterface {
 
     private final FilesManager filesManager;
-
-    private final Logger logger = LoggerFactory.getLogger(CreatingDocumentService.class);
 
     public CreatingDocumentService(FilesManager filesManager) {
         this.filesManager = filesManager;
@@ -20,6 +17,9 @@ public class CreatingDocumentService implements StatusInterface {
 
     @Override
     public boolean doProcess(Long orderId) {
+        if (!this.trySetupOrder(orderId)) {
+            return false;
+        }
         boolean result = false;
         try {
             result = this.filesManager.createExcelDocumentByOrderId(orderId);

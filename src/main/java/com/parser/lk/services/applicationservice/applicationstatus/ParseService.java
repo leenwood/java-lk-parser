@@ -5,7 +5,6 @@ import com.parser.lk.entity.Vacancy;
 import com.parser.lk.repository.OrderRepository;
 import com.parser.lk.repository.VacancyRepository;
 import com.parser.lk.services.applicationservice.NameStatusServiceEnum;
-import com.parser.lk.services.applicationservice.StatusInterface;
 import com.parser.lk.services.vacanciesparser.VacanciesParser;
 import com.parser.lk.services.vacanciesparser.dto.HeadHunterFiltersParam;
 import com.parser.lk.services.vacanciesparser.dto.vacancies.Vacancies;
@@ -18,18 +17,14 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service("ParseStatusService")
-public class ParseService implements StatusInterface {
+public class ParseService extends BaseStatusService implements StatusInterface {
 
     private final VacanciesParser vacanciesParser;
 
-    private final OrderRepository orderRepository;
-
     private final VacancyRepository vacancyRepository;
 
-    private final Logger logger = LoggerFactory.getLogger(ParseService.class);
 
     @Value("${application.period.parse.vacancies}")
     private Integer period;
@@ -38,47 +33,42 @@ public class ParseService implements StatusInterface {
     @Autowired
     public ParseService(
             VacanciesParser vacanciesParser,
-            OrderRepository orderRepository, VacancyRepository vacancyRepository
+            VacancyRepository vacancyRepository
     ) {
         this.vacanciesParser = vacanciesParser;
-        this.orderRepository = orderRepository;
         this.vacancyRepository = vacancyRepository;
     }
 
 
     @Override
     public boolean doProcess(Long orderId) {
-        Optional<Order> orderOptional = this.orderRepository.findById(orderId);
-        if (orderOptional.isEmpty()) {
-            this.logger.error(String.format("order by id %s not found", orderId));
+        if (!this.trySetupOrder(orderId)) {
             return false;
         }
-        Order order = orderOptional.get();
 
         List<Integer> area;
-        if (order.isAllRegion()) {
+        if (this.order.isAllRegion()) {
             area = this.getAllRegionsId();
         } else {
-            area = order.getRegionId();
+            area = this.order.getRegionId();
         }
 
         for (Integer cursor : area) {
             List<Integer> areaCursor = new ArrayList<>();
             areaCursor.add(cursor);
             HeadHunterFiltersParam filters = new HeadHunterFiltersParam(
-                    order.getSearchText(),
-                    order.getHasSalary(),
+                    this.order.getSearchText(),
+                    this.order.getHasSalary(),
                     this.period,
                     areaCursor,
-                    order.getExperience(),
-                    order.getSchedule(),
-                    order.getEmployment(),
-                    order.getVacancySearchFields(),
-                    order.getIndustries()
+                    this.order.getExperience(),
+                    this.order.getSchedule(),
+                    this.order.getEmployment(),
+                    this.order.getVacancySearchFields(),
+                    this.order.getIndustries()
             );
             int pages = this.vacanciesParser.getPagesVacanciesByFilter(filters);
-            System.out.printf("Количество страниц %s%n", pages);
-            parseVacancies(filters, pages, order.getGuid());
+            parseVacancies(filters, pages, this.order.getGuid());
         }
 
         return true;
@@ -88,7 +78,6 @@ public class ParseService implements StatusInterface {
         for (int currentPage = filters.getPage(); currentPage < pages; currentPage++) {
             filters.setPage(currentPage);
             Vacancies vacancies = this.vacanciesParser.ParseHeadHunterVacancies(filters);
-            System.out.printf("Текущая страница %s | Всего вакансий найдено %s%n", currentPage, vacancies.getFound());
             for (com.parser.lk.services.vacanciesparser.dto.vacancies.Vacancy vacancy : vacancies.getVacancies()) {
                 Vacancy transformVacancy = this.transformToVacancy(vacancy);
                 transformVacancy.setGuid(guid);

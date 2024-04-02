@@ -131,7 +131,6 @@ public class HeadHunterRequester {
                 .queryParam("page", filtersParam.getPage())
                 .queryParam("per_page", filtersParam.getPerPage())
                 .queryParam("no_magic", filtersParam.isNoMagic());
-        System.out.println(uri.build().toUriString());
         return uri.build().toUriString();
     }
 

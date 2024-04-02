@@ -1,4 +1,4 @@
-package com.parser.lk.services.applicationservice;
+package com.parser.lk.services.applicationservice.applicationstatus;
 
 public interface StatusInterface {
 

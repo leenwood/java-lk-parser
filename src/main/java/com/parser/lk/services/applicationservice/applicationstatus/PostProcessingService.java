@@ -1,28 +1,20 @@
 package com.parser.lk.services.applicationservice.applicationstatus;
 
-import com.parser.lk.entity.Order;
+
 import com.parser.lk.entity.Vacancy;
-import com.parser.lk.repository.OrderRepository;
 import com.parser.lk.repository.VacancyRepository;
 import com.parser.lk.services.aiservice.AiService;
 import com.parser.lk.services.applicationservice.NameStatusServiceEnum;
-import com.parser.lk.services.applicationservice.StatusInterface;
 import com.parser.lk.services.requester.centralbank.CentralBankRequester;
 import com.parser.lk.services.vacanciesparser.VacanciesParser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 
 @Service("PostProcessingStatusService")
-public class PostProcessingService implements StatusInterface {
+public class PostProcessingService extends BaseStatusService implements StatusInterface {
 
     private final VacancyRepository vacancyRepository;
-
-    private final OrderRepository orderRepository;
 
     private final VacanciesParser vacanciesParser;
 
@@ -30,19 +22,15 @@ public class PostProcessingService implements StatusInterface {
 
     private final CentralBankRequester centralBankRequester;
 
-    private final Logger logger = LoggerFactory.getLogger(PostProcessingService.class);
-
 
     @Autowired
     public PostProcessingService(
             VacancyRepository vacancyRepository,
-            OrderRepository orderRepository,
             VacanciesParser vacanciesParser,
             AiService aiService,
             CentralBankRequester centralBankRequester
     ) {
         this.vacancyRepository = vacancyRepository;
-        this.orderRepository = orderRepository;
         this.vacanciesParser = vacanciesParser;
         this.aiService = aiService;
         this.centralBankRequester = centralBankRequester;
@@ -51,15 +39,15 @@ public class PostProcessingService implements StatusInterface {
 
     @Override
     public boolean doProcess(Long orderId) {
-        Optional<Order> orderOptional = this.orderRepository.findById(orderId);
-        if (orderOptional.isEmpty()) {
+        if (!this.trySetupOrder(orderId)) {
             return false;
         }
-        Order order = orderOptional.get();
-        Integer count = this.vacancyRepository.countByGuidAndProcessed(order.getGuid(), false);
+
+
+        Integer count = this.vacancyRepository.countByGuidAndProcessed(this.order.getGuid(), false);
         while (count > 0) {
             count--;
-            Vacancy vacancy = this.vacancyRepository.findFirstByGuidAndProcessed(order.getGuid(), false);
+            Vacancy vacancy = this.vacancyRepository.findFirstByGuidAndProcessed(this.order.getGuid(), false);
             com.parser.lk.services.vacanciesparser.dto.vacancies.Vacancy vacancyResponse;
             vacancyResponse = this.vacanciesParser.getVacancyById(vacancy.getExternalId());
             vacancy.setVacancyDescription(vacancyResponse.getDescription());

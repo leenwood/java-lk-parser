@@ -3,7 +3,6 @@ package com.parser.lk.services.applicationservice.applicationstatus;
 import com.parser.lk.entity.Order;
 import com.parser.lk.repository.OrderRepository;
 import com.parser.lk.services.applicationservice.NameStatusServiceEnum;
-import com.parser.lk.services.applicationservice.StatusInterface;
 import com.parser.lk.services.telegrambotservice.TelegramNotificationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +17,7 @@ import java.util.Optional;
 
 
 @Service("COMPLETE_WITH_DOCUMENT")
-public class CompleteWithDocumentService implements StatusInterface {
+public class CompleteWithDocumentService extends BaseStatusService implements StatusInterface {
 
 
     @Value("${application.fileoutput.path}")
@@ -33,31 +32,22 @@ public class CompleteWithDocumentService implements StatusInterface {
 
     private final TelegramNotificationService telegramNotificationService;
 
-    private final OrderRepository orderRepository;
-
-    private final Logger logger = LoggerFactory.getLogger(CompleteWithDocumentService.class);
-
-    public CompleteWithDocumentService(TelegramNotificationService telegramNotificationService, OrderRepository orderRepository) {
+    public CompleteWithDocumentService(TelegramNotificationService telegramNotificationService) {
         this.telegramNotificationService = telegramNotificationService;
-        this.orderRepository = orderRepository;
     }
 
     @Override
     public boolean doProcess(Long orderId) {
-
-        Optional<Order> orderOptional = this.orderRepository.findById(orderId);
-        if (orderOptional.isEmpty()) {
-            this.logger.error(String.format("order by id %s not found", orderId));
+        if (!this.trySetupOrder(orderId)) {
             return false;
         }
-        Order order = orderOptional.get();
 
-        LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(order.getTimestamp()), ZoneId.systemDefault());
+        LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(this.order.getTimestamp()), ZoneId.systemDefault());
 
         String text = String.format(
                 "Номер запроса - %s\nТекст запроса - %s\nДата запроса - %s\nДокумент создан, ссылка для скачивания:\n",
-                order.getGuid(),
-                order.getSearchText(),
+                this.order.getGuid(),
+                this.order.getSearchText(),
                 dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
         );
         String url = String.format(
@@ -65,12 +55,12 @@ public class CompleteWithDocumentService implements StatusInterface {
                 "http",
                 this.serverAddress,
                 this.serverPort,
-                order.getGuid()
+                this.order.getGuid()
         );
 
 
         if (!this.telegramNotificationService.sendNotification(text, url)) {
-            this.logger.info(String.format("Message not be delivery. OrderId: %s", order.getId()));
+            this.logger.info(String.format("Message not be delivery. OrderId: %s", this.order.getId()));
         }
         return true;
     }
