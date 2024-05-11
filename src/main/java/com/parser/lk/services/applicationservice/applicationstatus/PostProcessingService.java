@@ -52,8 +52,11 @@ public class PostProcessingService extends BaseStatusService implements StatusIn
             vacancyResponse = this.vacanciesParser.getVacancyById(vacancy.getExternalId());
             vacancy.setVacancyDescription(vacancyResponse.getDescription());
 
-            vacancy.setFunctionalDescription(this.aiService.extractDescription(vacancyResponse.getDescription()));
-            vacancy.setGrade(this.aiService.extractGrade(vacancyResponse.getName()));
+            var gptResponse = this.aiService.getChatGPTResponseByVacancy(vacancy);
+            if (gptResponse != null) {
+                vacancy.setFunctionalDescription(gptResponse.getFunctional());
+                vacancy.setGrade(gptResponse.getGrade());
+            }
 
             if (vacancyResponse.getSalary() != null) {
                 try {

@@ -25,6 +25,8 @@ application.areas.url=https://api.hh.ru/areas/113
 application.period.parse.vacancies=14
 application.fileoutput.path=files/xlsx
 application.cbr.currency.url=https://cbr.ru/scripts/XML_daily.asp
+application.chatgpt.url=https://example.com/
+application.chatgpt.prompt=text
 
 application.http.type=http
 application.hostname=109.71.242.120
