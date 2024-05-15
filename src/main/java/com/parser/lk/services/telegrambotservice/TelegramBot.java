@@ -48,7 +48,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
 
         try {
-            execute(message); // Отправляем сообщение
+            execute(message);
         } catch (TelegramApiException e) {
             logger.error(e.toString());
             return false;
@@ -58,13 +58,11 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     @Override
     public String getBotUsername() {
-        // Возвращает имя вашего бота
         return this.botUsername;
     }
 
     @Override
     public String getBotToken() {
-        // Возвращает токен вашего бота
         return this.botToken;
     }
 
